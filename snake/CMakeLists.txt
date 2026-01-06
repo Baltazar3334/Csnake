@@ -1,48 +1,23 @@
 cmake_minimum_required(VERSION 4.1)
-project(SnakeGame C)
+project(Csnake C)
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -g -pthread")
 
-# Common súbory
-set(SRC_COMMON
+add_executable(server
+        server/server.c
         common/ipc.c
         common/game.c
         common/world.c
 )
 
-set(HDR_COMMON
-        common/ipc.h
-        common/game.h
-        common/world.h
-)
-
-# Klient
-set(SRC_CLIENT
+add_executable(client
         client/client.c
-        client/input.c
+        common/ipc.c
+        common/game.c
+        common/world.c
+        common/config.h
+        common/config.h
         client/render_text.c
-        ${SRC_COMMON}
-)
-
-set(HDR_CLIENT
+        client/input.c
         client/input.h
-        client/render_text.h
-        ${HDR_COMMON}
 )
-
-add_executable(client ${SRC_CLIENT} ${HDR_CLIENT})
-target_link_libraries(client pthread)
-
-# Server
-set(SRC_SERVER
-        server/server.c
-        ${SRC_COMMON}
-)
-
-set(HDR_SERVER
-        ${HDR_COMMON}
-)
-
-add_executable(server ${SRC_SERVER} ${HDR_SERVER})
-target_link_libraries(server pthread)

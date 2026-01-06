@@ -1,4 +1,5 @@
 #include "ipc.h"
+#include "../common/config.h"
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <unistd.h>

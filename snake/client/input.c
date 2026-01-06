@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "../common/config.h"
 #include <termios.h>
 #include <fcntl.h>
 #include "../common/ipc.h"

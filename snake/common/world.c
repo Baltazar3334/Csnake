@@ -1,3 +1,4 @@
+#include "../common/config.h"
 #include "world.h"
 #include <stdio.h>
 #include <string.h>

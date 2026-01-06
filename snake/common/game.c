@@ -1,9 +1,7 @@
+#include "../common/config.h"
 #include "game.h"
-
 #include <stdio.h>
-
 #include "world.h"
-
 #include <stdlib.h>
 #include <time.h>
 

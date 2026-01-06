@@ -1,66 +1,58 @@
-#include <pthread.h>
-#include <semaphore.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
 
+#include "../common/config.h"
 #include "../common/ipc.h"
 #include "../common/game.h"
 
-void* game_loop(void* arg) {
-    SharedGame *game = arg;
+SharedGame *game = NULL;
+
+void handle_sigint(int sig) {
+    (void)sig;
+    if (game) {
+        ipc_destroy();
+        printf("\nServer ukončený.\n");
+    }
+    exit(0);
+}
+
+int main(void) {
+    signal(SIGINT, handle_sigint);
+
+    ipc_create();
+    game = ipc_attach();
+    if (!game) {
+        perror("Pripajanie k zdieľanej pamäti zlyhalo");
+        exit(1);
+    }
+
+    game_init(game, MODE_TIME, 60, WORLD_NO_OBSTACLES, NULL);
+
+    printf("Server spustený.\n");
 
     while (game->running) {
-        sem_wait(game_sem);
-
-        /* === ČASOVÝ REŽIM === */
-        if (game->mode == MODE_TIME &&
-            game->game_time >= game->max_time) {
-
-            printf("Cas hry vyprsal\n");
-
-            for (int i = 0; i < MAX_PLAYERS; i++) {
-                game->snakes[i].active = 0;
-            }
-
-            game->running = 0;
-            sem_post(game_sem);
-            break;
-            }
-
         for (int i = 0; i < MAX_PLAYERS; i++) {
-            Snake *s = &game->snakes[i];
-            if (!s->active || s->paused) continue;
-
-            if (s->pause_timer > 0) {
-                s->pause_timer--;
+            if (!game->snakes[i].active || game->snakes[i].paused)
                 continue;
-            }
 
             game_move_snake(game, i);
 
             if (game_check_collision(game, i)) {
-                s->active = 0;
+                printf("Hráč %d prehral.\n", i);
+                game->snakes[i].active = 0;
             }
         }
 
+        usleep(200000);
         game->game_time++;
-        sem_post(game_sem);
-        sleep(1);
+
+        if (game->mode == MODE_TIME && game->game_time >= game->max_time)
+            game->running = 0;
     }
-    return NULL;
-}
 
-int main(int argc, char **argv) {
-    ipc_create();
-    SharedGame *game = ipc_attach();
-
-    // napr. časový režim na 60 sekúnd
-    game_init(game, MODE_TIME, 60);
-
-    pthread_t loop;
-    pthread_create(&loop, NULL, game_loop, game);
-
-    pthread_join(loop, NULL);
+    printf("Hra skončila.\n");
     ipc_destroy();
     return 0;
 }

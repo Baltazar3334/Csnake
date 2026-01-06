@@ -2,16 +2,11 @@
 #define IPC_H
 
 #include <semaphore.h>
-#include "world.h"   // world je potrebný pre SharedGame
 
-#define MAX_PLAYERS 4
-#define MAP_W 40
-#define MAP_H 20
-#define MAX_FRUITS MAX_PLAYERS
+#include "../common/config.h"
+#include "world.h"
 
-typedef struct {
-    int x, y;
-} Point;
+
 
 typedef enum {
     DIR_UP,
@@ -21,9 +16,13 @@ typedef enum {
 } Direction;
 
 typedef struct {
-    int active;          // hráč je v hre
-    int paused;          // hráč pozastavil hru
-    int pause_timer;     // sekundy do obnovenia pohybu
+    int x, y;
+} Point;
+
+typedef struct {
+    int active;
+    int paused;
+    int pause_timer;
     int score;
     int length;
     Direction dir;
@@ -31,28 +30,27 @@ typedef struct {
 } Snake;
 
 typedef enum {
-    MODE_STANDARD,
-    MODE_TIME
-} GameMode;
-
-typedef enum {
     WORLD_NO_OBSTACLES,
     WORLD_WITH_OBSTACLES
 } WorldType;
 
+typedef enum {
+    MODE_STANDARD,
+    MODE_TIME
+} GameMode;
+
 typedef struct {
-    Point fruits[MAX_FRUITS];
+    Point fruits[MAX_PLAYERS];
     Snake snakes[MAX_PLAYERS];
 
-    int running;          // server beží
-    int game_time;        // uplynutý čas
-    int max_time;         // max čas (len MODE_TIME)
-    GameMode mode;        // herný režim
+    int running;
+    int game_time;
+    int max_time;
+    GameMode mode;
     World world;
     WorldType world_type;
 } SharedGame;
 
-// IPC funkcie
 int ipc_create();
 SharedGame* ipc_attach();
 void ipc_destroy();

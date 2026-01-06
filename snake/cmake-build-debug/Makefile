@@ -123,19 +123,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named client
-
-# Build rule for target.
-client: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 client
-.PHONY : client
-
-# fast build rule for target.
-client/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/build
-.PHONY : client/fast
-
-#=============================================================================
 # Target rules for targets named server
 
 # Build rule for target.
@@ -147,6 +134,19 @@ server: cmake_check_build_system
 server/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\server.dir\build.make CMakeFiles/server.dir/build
 .PHONY : server/fast
+
+#=============================================================================
+# Target rules for targets named client
+
+# Build rule for target.
+client: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 client
+.PHONY : client
+
+# fast build rule for target.
+client/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/build
+.PHONY : client/fast
 
 client/client.obj: client/client.c.obj
 .PHONY : client/client.obj
@@ -225,8 +225,8 @@ common/game.obj: common/game.c.obj
 
 # target to build an object file
 common/game.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/game.c.obj
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\server.dir\build.make CMakeFiles/server.dir/common/game.c.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/game.c.obj
 .PHONY : common/game.c.obj
 
 common/game.i: common/game.c.i
@@ -234,8 +234,8 @@ common/game.i: common/game.c.i
 
 # target to preprocess a source file
 common/game.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/game.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\server.dir\build.make CMakeFiles/server.dir/common/game.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/game.c.i
 .PHONY : common/game.c.i
 
 common/game.s: common/game.c.s
@@ -243,8 +243,8 @@ common/game.s: common/game.c.s
 
 # target to generate assembly for a file
 common/game.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/game.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\server.dir\build.make CMakeFiles/server.dir/common/game.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/game.c.s
 .PHONY : common/game.c.s
 
 common/ipc.obj: common/ipc.c.obj
@@ -252,8 +252,8 @@ common/ipc.obj: common/ipc.c.obj
 
 # target to build an object file
 common/ipc.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/ipc.c.obj
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\server.dir\build.make CMakeFiles/server.dir/common/ipc.c.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/ipc.c.obj
 .PHONY : common/ipc.c.obj
 
 common/ipc.i: common/ipc.c.i
@@ -261,8 +261,8 @@ common/ipc.i: common/ipc.c.i
 
 # target to preprocess a source file
 common/ipc.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/ipc.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\server.dir\build.make CMakeFiles/server.dir/common/ipc.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/ipc.c.i
 .PHONY : common/ipc.c.i
 
 common/ipc.s: common/ipc.c.s
@@ -270,8 +270,8 @@ common/ipc.s: common/ipc.c.s
 
 # target to generate assembly for a file
 common/ipc.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/ipc.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\server.dir\build.make CMakeFiles/server.dir/common/ipc.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/ipc.c.s
 .PHONY : common/ipc.c.s
 
 common/world.obj: common/world.c.obj
@@ -279,8 +279,8 @@ common/world.obj: common/world.c.obj
 
 # target to build an object file
 common/world.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/world.c.obj
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\server.dir\build.make CMakeFiles/server.dir/common/world.c.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/world.c.obj
 .PHONY : common/world.c.obj
 
 common/world.i: common/world.c.i
@@ -288,8 +288,8 @@ common/world.i: common/world.c.i
 
 # target to preprocess a source file
 common/world.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/world.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\server.dir\build.make CMakeFiles/server.dir/common/world.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/world.c.i
 .PHONY : common/world.c.i
 
 common/world.s: common/world.c.s
@@ -297,8 +297,8 @@ common/world.s: common/world.c.s
 
 # target to generate assembly for a file
 common/world.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/world.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\server.dir\build.make CMakeFiles/server.dir/common/world.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\client.dir\build.make CMakeFiles/client.dir/common/world.c.s
 .PHONY : common/world.c.s
 
 server/server.obj: server/server.c.obj

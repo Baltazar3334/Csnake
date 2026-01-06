@@ -1,72 +1,52 @@
 #include <stdio.h>
-#include <pthread.h>
+#include <stdlib.h>
 #include <unistd.h>
-#include "../common/game.h"
+
+#include "../common/config.h"
 #include "../common/ipc.h"
-#include "../common/world.h"
-#include "input.h"
-#include "render_text.h"
+#include "../common/game.h"
 
 
+SharedGame *game = NULL;
 
-SharedGame *game; // globálna pre input.c
-
-int main() {
-    game = ipc_attach();
-    if (!game) { perror("ipc_attach"); return 1; }
-
-    // kontrola, či hra beží
-    sem_wait(game_sem);
-    if (!game->running) {
-        sem_post(game_sem);
-        printf("Hra je uz ukoncena – neda sa pripojit\n");
-        return 0;
-    }
-    sem_post(game_sem);
-
-    // registrácia hráča
-    sem_wait(game_sem);
-    int id = -1;
-    for (int i = 0; i < MAX_PLAYERS; i++) {
-        if (!game->snakes[i].active) {
-            id = i;
-            Snake *s = &game->snakes[i];
-            s->active = 1; s->paused = 0; s->pause_timer = 0;
-            s->score = 0; s->length = 3; s->dir = DIR_RIGHT;
-            for (int j = 0; j < s->length; j++) {
-                s->body[j].x = 10 - j; s->body[j].y = 10;
+void render() {
+    printf("\033[H\033[J");  // vyčistí obrazovku
+    for (int y = 0; y < game->world.height; y++) {
+        for (int x = 0; x < game->world.width; x++) {
+            char c = '.';
+            if (game->world.grid[y][x] == WORLD_WALL)
+                c = '#';
+            for (int i = 0; i < MAX_PLAYERS; i++) {
+                if (!game->snakes[i].active) continue;
+                for (int j = 0; j < game->snakes[i].length; j++) {
+                    if (game->snakes[i].body[j].x == x &&
+                        game->snakes[i].body[j].y == y)
+                        c = 'S';
+                }
             }
-            break;
+            for (int i = 0; i < MAX_PLAYERS; i++) {
+                if (game->fruits[i].x == x && game->fruits[i].y == y)
+                    c = 'F';
+            }
+            printf("%c", c);
         }
+        printf("\n");
     }
-    sem_post(game_sem);
+}
 
-    if (id == -1) { printf("Hra je plná\n"); return 0; }
+int main(void) {
+    game = ipc_attach();
+    if (!game) {
+        perror("Pripojenie k serveru zlyhalo");
+        exit(1);
+    }
 
-    // inicializácia textového renderu
-    render_init_text();
-
-    // spustenie vstupného vlákna
-    pthread_t input_thread;
-    pthread_create(&input_thread, NULL, input_loop, &id);
-
-    // hlavný cyklus
-    while (1) {
-        sem_wait(game_sem);
-        Snake *s = &game->snakes[id];
-        if (!s->active) { sem_post(game_sem); break; }
-
-        render_game_text(game, id);
-
-        sem_post(game_sem);
+    while (game->running) {
+        render();
         usleep(200000);
     }
 
-    pthread_join(input_thread, NULL);
-
-    render_cleanup_text();
-
-    printf("\nKoniec hry\n");
+    printf("Hra skončila.\n");
     return 0;
 }
 

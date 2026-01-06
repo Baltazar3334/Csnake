@@ -1,6 +1,10 @@
+#include "../common/config.h"
 #include "render_text.h"
+#include "../common/ipc.h"
+#include "../common/game.h"
 #include <stdio.h>
 #include <unistd.h>
+
 
 void render_init_text() {
     // Textový render nepotrebuje nič špeciálne

@@ -85,38 +85,10 @@ CMakeFiles/client.dir/client/client.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/client.dir/client/client.c.s"
 	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\Baltazar\CLionProjects\Csnake\snake\client\client.c -o CMakeFiles\client.dir\client\client.c.s
 
-CMakeFiles/client.dir/client/input.c.obj: CMakeFiles/client.dir/flags.make
-CMakeFiles/client.dir/client/input.c.obj: C:/Users/Baltazar/CLionProjects/Csnake/snake/client/input.c
-CMakeFiles/client.dir/client/input.c.obj: CMakeFiles/client.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\Baltazar\CLionProjects\Csnake\snake\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/client.dir/client/input.c.obj"
-	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/client/input.c.obj -MF CMakeFiles\client.dir\client\input.c.obj.d -o CMakeFiles\client.dir\client\input.c.obj -c C:\Users\Baltazar\CLionProjects\Csnake\snake\client\input.c
-
-CMakeFiles/client.dir/client/input.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/client.dir/client/input.c.i"
-	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Users\Baltazar\CLionProjects\Csnake\snake\client\input.c > CMakeFiles\client.dir\client\input.c.i
-
-CMakeFiles/client.dir/client/input.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/client.dir/client/input.c.s"
-	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\Baltazar\CLionProjects\Csnake\snake\client\input.c -o CMakeFiles\client.dir\client\input.c.s
-
-CMakeFiles/client.dir/client/render_text.c.obj: CMakeFiles/client.dir/flags.make
-CMakeFiles/client.dir/client/render_text.c.obj: C:/Users/Baltazar/CLionProjects/Csnake/snake/client/render_text.c
-CMakeFiles/client.dir/client/render_text.c.obj: CMakeFiles/client.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\Baltazar\CLionProjects\Csnake\snake\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/client.dir/client/render_text.c.obj"
-	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/client/render_text.c.obj -MF CMakeFiles\client.dir\client\render_text.c.obj.d -o CMakeFiles\client.dir\client\render_text.c.obj -c C:\Users\Baltazar\CLionProjects\Csnake\snake\client\render_text.c
-
-CMakeFiles/client.dir/client/render_text.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/client.dir/client/render_text.c.i"
-	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Users\Baltazar\CLionProjects\Csnake\snake\client\render_text.c > CMakeFiles\client.dir\client\render_text.c.i
-
-CMakeFiles/client.dir/client/render_text.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/client.dir/client/render_text.c.s"
-	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\Baltazar\CLionProjects\Csnake\snake\client\render_text.c -o CMakeFiles\client.dir\client\render_text.c.s
-
 CMakeFiles/client.dir/common/ipc.c.obj: CMakeFiles/client.dir/flags.make
 CMakeFiles/client.dir/common/ipc.c.obj: C:/Users/Baltazar/CLionProjects/Csnake/snake/common/ipc.c
 CMakeFiles/client.dir/common/ipc.c.obj: CMakeFiles/client.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\Baltazar\CLionProjects\Csnake\snake\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/client.dir/common/ipc.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\Baltazar\CLionProjects\Csnake\snake\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/client.dir/common/ipc.c.obj"
 	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/common/ipc.c.obj -MF CMakeFiles\client.dir\common\ipc.c.obj.d -o CMakeFiles\client.dir\common\ipc.c.obj -c C:\Users\Baltazar\CLionProjects\Csnake\snake\common\ipc.c
 
 CMakeFiles/client.dir/common/ipc.c.i: cmake_force
@@ -130,7 +102,7 @@ CMakeFiles/client.dir/common/ipc.c.s: cmake_force
 CMakeFiles/client.dir/common/game.c.obj: CMakeFiles/client.dir/flags.make
 CMakeFiles/client.dir/common/game.c.obj: C:/Users/Baltazar/CLionProjects/Csnake/snake/common/game.c
 CMakeFiles/client.dir/common/game.c.obj: CMakeFiles/client.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\Baltazar\CLionProjects\Csnake\snake\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/client.dir/common/game.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\Baltazar\CLionProjects\Csnake\snake\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/client.dir/common/game.c.obj"
 	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/common/game.c.obj -MF CMakeFiles\client.dir\common\game.c.obj.d -o CMakeFiles\client.dir\common\game.c.obj -c C:\Users\Baltazar\CLionProjects\Csnake\snake\common\game.c
 
 CMakeFiles/client.dir/common/game.c.i: cmake_force
@@ -144,7 +116,7 @@ CMakeFiles/client.dir/common/game.c.s: cmake_force
 CMakeFiles/client.dir/common/world.c.obj: CMakeFiles/client.dir/flags.make
 CMakeFiles/client.dir/common/world.c.obj: C:/Users/Baltazar/CLionProjects/Csnake/snake/common/world.c
 CMakeFiles/client.dir/common/world.c.obj: CMakeFiles/client.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\Baltazar\CLionProjects\Csnake\snake\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/client.dir/common/world.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\Baltazar\CLionProjects\Csnake\snake\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/client.dir/common/world.c.obj"
 	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/common/world.c.obj -MF CMakeFiles\client.dir\common\world.c.obj.d -o CMakeFiles\client.dir\common\world.c.obj -c C:\Users\Baltazar\CLionProjects\Csnake\snake\common\world.c
 
 CMakeFiles/client.dir/common/world.c.i: cmake_force
@@ -155,24 +127,52 @@ CMakeFiles/client.dir/common/world.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/client.dir/common/world.c.s"
 	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\Baltazar\CLionProjects\Csnake\snake\common\world.c -o CMakeFiles\client.dir\common\world.c.s
 
+CMakeFiles/client.dir/client/render_text.c.obj: CMakeFiles/client.dir/flags.make
+CMakeFiles/client.dir/client/render_text.c.obj: C:/Users/Baltazar/CLionProjects/Csnake/snake/client/render_text.c
+CMakeFiles/client.dir/client/render_text.c.obj: CMakeFiles/client.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\Baltazar\CLionProjects\Csnake\snake\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/client.dir/client/render_text.c.obj"
+	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/client/render_text.c.obj -MF CMakeFiles\client.dir\client\render_text.c.obj.d -o CMakeFiles\client.dir\client\render_text.c.obj -c C:\Users\Baltazar\CLionProjects\Csnake\snake\client\render_text.c
+
+CMakeFiles/client.dir/client/render_text.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/client.dir/client/render_text.c.i"
+	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Users\Baltazar\CLionProjects\Csnake\snake\client\render_text.c > CMakeFiles\client.dir\client\render_text.c.i
+
+CMakeFiles/client.dir/client/render_text.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/client.dir/client/render_text.c.s"
+	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\Baltazar\CLionProjects\Csnake\snake\client\render_text.c -o CMakeFiles\client.dir\client\render_text.c.s
+
+CMakeFiles/client.dir/client/input.c.obj: CMakeFiles/client.dir/flags.make
+CMakeFiles/client.dir/client/input.c.obj: C:/Users/Baltazar/CLionProjects/Csnake/snake/client/input.c
+CMakeFiles/client.dir/client/input.c.obj: CMakeFiles/client.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\Baltazar\CLionProjects\Csnake\snake\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/client.dir/client/input.c.obj"
+	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/client/input.c.obj -MF CMakeFiles\client.dir\client\input.c.obj.d -o CMakeFiles\client.dir\client\input.c.obj -c C:\Users\Baltazar\CLionProjects\Csnake\snake\client\input.c
+
+CMakeFiles/client.dir/client/input.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/client.dir/client/input.c.i"
+	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Users\Baltazar\CLionProjects\Csnake\snake\client\input.c > CMakeFiles\client.dir\client\input.c.i
+
+CMakeFiles/client.dir/client/input.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/client.dir/client/input.c.s"
+	C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\Baltazar\CLionProjects\Csnake\snake\client\input.c -o CMakeFiles\client.dir\client\input.c.s
+
 # Object files for target client
 client_OBJECTS = \
 "CMakeFiles/client.dir/client/client.c.obj" \
-"CMakeFiles/client.dir/client/input.c.obj" \
-"CMakeFiles/client.dir/client/render_text.c.obj" \
 "CMakeFiles/client.dir/common/ipc.c.obj" \
 "CMakeFiles/client.dir/common/game.c.obj" \
-"CMakeFiles/client.dir/common/world.c.obj"
+"CMakeFiles/client.dir/common/world.c.obj" \
+"CMakeFiles/client.dir/client/render_text.c.obj" \
+"CMakeFiles/client.dir/client/input.c.obj"
 
 # External object files for target client
 client_EXTERNAL_OBJECTS =
 
 client.exe: CMakeFiles/client.dir/client/client.c.obj
-client.exe: CMakeFiles/client.dir/client/input.c.obj
-client.exe: CMakeFiles/client.dir/client/render_text.c.obj
 client.exe: CMakeFiles/client.dir/common/ipc.c.obj
 client.exe: CMakeFiles/client.dir/common/game.c.obj
 client.exe: CMakeFiles/client.dir/common/world.c.obj
+client.exe: CMakeFiles/client.dir/client/render_text.c.obj
+client.exe: CMakeFiles/client.dir/client/input.c.obj
 client.exe: CMakeFiles/client.dir/build.make
 client.exe: CMakeFiles/client.dir/linkLibs.rsp
 client.exe: CMakeFiles/client.dir/objects1.rsp

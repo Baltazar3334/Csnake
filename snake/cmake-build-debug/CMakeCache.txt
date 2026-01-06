@@ -128,7 +128,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=SnakeGame
+CMAKE_PROJECT_NAME:STATIC=Csnake
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=C:/Program Files/JetBrains/CLion 2025.3/bin/mingw/bin/ranlib.exe
@@ -212,6 +212,15 @@ CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 // during the make.  This is useful for debugging only. With Visual
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
+
+//Value Computed by CMake
+Csnake_BINARY_DIR:STATIC=C:/Users/Baltazar/CLionProjects/Csnake/snake/cmake-build-debug
+
+//Value Computed by CMake
+Csnake_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+Csnake_SOURCE_DIR:STATIC=C:/Users/Baltazar/CLionProjects/Csnake/snake
 
 //Value Computed by CMake
 SnakeGame_BINARY_DIR:STATIC=C:/Users/Baltazar/CLionProjects/Csnake/snake/cmake-build-debug
