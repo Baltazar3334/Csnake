@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
+#include "../common/game.h"
 #include "../common/ipc.h"
+#include "../common/world.h"
 #include "input.h"
 #include "render_text.h"
+
+
 
 SharedGame *game; // globálna pre input.c
 
