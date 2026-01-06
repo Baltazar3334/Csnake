@@ -1,58 +1,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <signal.h>
 
-#include "../common/config.h"
 #include "../common/ipc.h"
 #include "../common/game.h"
 
-SharedGame *game = NULL;
-
-void handle_sigint(int sig) {
-    (void)sig;
-    if (game) {
-        ipc_destroy();
-        printf("\nServer ukončený.\n");
-    }
-    exit(0);
-}
-
-int main(void) {
-    signal(SIGINT, handle_sigint);
-
-    ipc_create();
-    game = ipc_attach();
-    if (!game) {
-        perror("Pripajanie k zdieľanej pamäti zlyhalo");
+int main(int argc, char **argv) {
+    // Vytvorenie shared memory
+    if (ipc_create() == -1) {
         exit(1);
     }
 
+    SharedGame *game = ipc_attach();
+    if (!game) {
+        fprintf(stderr, "Nepodarilo sa pripojit k shared memory\n");
+        exit(1);
+    }
+
+    // Inicializácia hry
     game_init(game, MODE_TIME, 60, WORLD_NO_OBSTACLES, NULL);
 
-    printf("Server spustený.\n");
+    game->running = 1;
 
+    printf("Server spusteny\n");
+
+    // Hlavny loop servera (jednoduchý)
     while (game->running) {
-        for (int i = 0; i < MAX_PLAYERS; i++) {
-            if (!game->snakes[i].active || game->snakes[i].paused)
-                continue;
-
-            game_move_snake(game, i);
-
-            if (game_check_collision(game, i)) {
-                printf("Hráč %d prehral.\n", i);
-                game->snakes[i].active = 0;
-            }
-        }
-
-        usleep(200000);
+        // Tu by sa pohybovali hadíky, kontrola kolízií, atď.
+        sleep(1);
         game->game_time++;
-
         if (game->mode == MODE_TIME && game->game_time >= game->max_time)
             game->running = 0;
     }
 
-    printf("Hra skončila.\n");
+    printf("Server ukonceny\n");
     ipc_destroy();
     return 0;
 }

@@ -2,12 +2,10 @@
 #define IPC_H
 
 #include <semaphore.h>
-
 #include "../common/config.h"
 #include "world.h"
 
-
-
+// Typy
 typedef enum {
     DIR_UP,
     DIR_DOWN,
@@ -40,7 +38,7 @@ typedef enum {
 } GameMode;
 
 typedef struct {
-    Point fruits[MAX_PLAYERS];
+    Point fruits[MAX_FRUITS];
     Snake snakes[MAX_PLAYERS];
 
     int running;
@@ -51,6 +49,7 @@ typedef struct {
     WorldType world_type;
 } SharedGame;
 
+// IPC funkcie
 int ipc_create();
 SharedGame* ipc_attach();
 void ipc_destroy();

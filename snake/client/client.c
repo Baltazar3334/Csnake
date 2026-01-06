@@ -1,15 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#include "../common/config.h"
 #include "../common/ipc.h"
-#include "../common/game.h"
-
 
 SharedGame *game = NULL;
 
 void render() {
+    if (!game) return;
+
     printf("\033[H\033[J");  // vyčistí obrazovku
     for (int y = 0; y < game->world.height; y++) {
         for (int x = 0; x < game->world.width; x++) {
@@ -24,7 +22,7 @@ void render() {
                         c = 'S';
                 }
             }
-            for (int i = 0; i < MAX_PLAYERS; i++) {
+            for (int i = 0; i < MAX_FRUITS; i++) {
                 if (game->fruits[i].x == x && game->fruits[i].y == y)
                     c = 'F';
             }
