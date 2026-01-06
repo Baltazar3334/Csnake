@@ -1,38 +1,45 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <signal.h>
+#include <semaphore.h>
 
-#include "../common/config.h"
 #include "../common/ipc.h"
 #include "../common/game.h"
 
-SharedGame *game = NULL;
-
-void handle_sigint(int sig) {
-    (void)sig;
-    if (game) {
-        ipc_destroy();
-        printf("\nServer ukončený.\n");
-    }
-    exit(0);
-}
-
 int main(void) {
-    signal(SIGINT, handle_sigint);
 
-    ipc_create();
-    game = ipc_attach();
+    int fd = ipc_create();
+    SharedGame *game = ipc_attach();
+
     if (!game) {
-        perror("Pripajanie k zdieľanej pamäti zlyhalo");
+        perror("Nepodarilo sa pripojit k zdieľanej pamäti");
         exit(1);
     }
 
-    game_init(game, MODE_TIME, 60, WORLD_NO_OBSTACLES, NULL);
+    // Inicializácia hry
+    game_init(game, MODE_STANDARD, 0, WORLD_NO_OBSTACLES, NULL);
+    game->running = 1;
 
-    printf("Server spustený.\n");
+    printf("Server spusteny. Hra bezi.\n");
 
-    while (game->running) {
+    // Hlavný herný loop
+    while (1) {
+        sem_wait(game_sem);
+
+        int active_players = 0;
+        for (int i = 0; i < MAX_PLAYERS; i++) {
+            if (game->snakes[i].active)
+                active_players++;
+        }
+
+        // Ak uz nie su aktivni hraci, ukonci hru
+        if (active_players == 0) {
+            game->running = 0;
+            sem_post(game_sem);
+            break;
+        }
+
+        // Pohyb hadikov a kontrola kolizii
         for (int i = 0; i < MAX_PLAYERS; i++) {
             if (!game->snakes[i].active || game->snakes[i].paused)
                 continue;
@@ -40,19 +47,24 @@ int main(void) {
             game_move_snake(game, i);
 
             if (game_check_collision(game, i)) {
-                printf("Hráč %d prehral.\n", i);
+                printf("Hadik %d zomrel.\n", i);
                 game->snakes[i].active = 0;
             }
         }
 
-        usleep(200000);
+        // Pripadne generovanie ovocia
+        game_spawn_fruits(game);
+
+        // Inkrementacia casu
         game->game_time++;
 
-        if (game->mode == MODE_TIME && game->game_time >= game->max_time)
-            game->running = 0;
+        sem_post(game_sem);
+
+        usleep(200000); // 200ms medzi krokmi hry
     }
 
-    printf("Hra skončila.\n");
-    ipc_destroy();
+    printf("Hra skončila. Server ukončený.\n");
+
+    ipc_destroy(); // uvolni zdieľanú pamäť a semafor
     return 0;
 }

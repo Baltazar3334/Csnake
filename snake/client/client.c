@@ -1,36 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#include "../common/config.h"
+#include <pthread.h>
 #include "../common/ipc.h"
-#include "../common/game.h"
-
+#include "../client/input.h"
+#include "../client/render_text.h"
 
 SharedGame *game = NULL;
+int my_id = -1; // ID hadíka priradené klientom
 
-void render() {
-    printf("\033[H\033[J");  // vyčistí obrazovku
-    for (int y = 0; y < game->world.height; y++) {
-        for (int x = 0; x < game->world.width; x++) {
-            char c = '.';
-            if (game->world.grid[y][x] == WORLD_WALL)
-                c = '#';
-            for (int i = 0; i < MAX_PLAYERS; i++) {
-                if (!game->snakes[i].active) continue;
-                for (int j = 0; j < game->snakes[i].length; j++) {
-                    if (game->snakes[i].body[j].x == x &&
-                        game->snakes[i].body[j].y == y)
-                        c = 'S';
-                }
-            }
-            for (int i = 0; i < MAX_PLAYERS; i++) {
-                if (game->fruits[i].x == x && game->fruits[i].y == y)
-                    c = 'F';
-            }
-            printf("%c", c);
+void assign_player() {
+    sem_wait(game_sem);
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        if (!game->snakes[i].active) {
+            game->snakes[i].active = 1;
+            game->snakes[i].paused = 0;
+            game->snakes[i].dir = DIR_RIGHT;
+            game->snakes[i].length = 3;
+            game->snakes[i].score = 0;
+            my_id = i;
+            break;
         }
-        printf("\n");
+    }
+    sem_post(game_sem);
+
+    if (my_id == -1) {
+        printf("Vsetky miesta pre hracov su obsadene!\n");
+        exit(1);
     }
 }
 
@@ -41,10 +37,21 @@ int main(void) {
         exit(1);
     }
 
-    while (game->running) {
-        render();
+    assign_player();
+
+    pthread_t tid;
+    pthread_create(&tid, NULL, input_loop, &my_id);
+
+    render_init_text();
+
+    while (game->running && game->snakes[my_id].active) {
+        sem_wait(game_sem);
+        render_game_text(game, my_id);
+        sem_post(game_sem);
         usleep(200000);
     }
+
+    render_cleanup_text();
 
     printf("Hra skončila.\n");
     return 0;
