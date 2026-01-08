@@ -7,23 +7,44 @@
 #include "../common/game.h"
 
 int main(void) {
-    SharedGame *game = ipc_attach();
-    if (!game) {
-        perror("Nepodarilo sa pripojit k zdieľanej pamäti");
+    // ===== 1️⃣ Vytvorenie shared memory a semaforu =====
+    if (ipc_create() == -1) {
+        fprintf(stderr, "Nepodarilo sa vytvorit shared memory a semafor\n");
         exit(1);
     }
 
-    // Inicializácia hry
+    // ===== 2️⃣ Pripojenie servera k shared memory =====
+    SharedGame *game = ipc_attach();
+    if (!game) {
+        perror("Pripojenie k shared memory zlyhalo");
+        exit(1);
+    }
+
+    // ===== 3️⃣ Inicializácia hry =====
     game_init(game, MODE_STANDARD, 0, WORLD_NO_OBSTACLES, NULL);
     game->running = 1;
-    game->shutdown = 0;  // flag pre klientov
+    game->shutdown = 0;
 
-    printf("Server spusteny. Hra bezi.\n");
+    // ===== 4️⃣ Čakanie na pripojenie hráčov =====
+    printf("Cakam na pripojenie hracov...\n");
+    int connected = 0;
+    while (connected == 0) {
+        sem_wait(game_sem);
+        connected = 0;
+        for (int i = 0; i < MAX_PLAYERS; i++) {
+            if (game->snakes[i].active)
+                connected++;
+        }
+        sem_post(game_sem);
+        usleep(100000); // 100ms
+    }
+    printf("%d hraci pripojeni. Spustam hru.\n", connected);
 
+    // ===== 5️⃣ Hlavný herný loop =====
     while (1) {
         sem_wait(game_sem);
 
-        // Pohyb hadikov a kontrola kolízii
+        // Pohyb hadikov a kontrola kolízií
         for (int i = 0; i < MAX_PLAYERS; i++) {
             Snake *s = &game->snakes[i];
             if (!s->active || s->paused)
@@ -37,13 +58,13 @@ int main(void) {
             }
         }
 
-        // Generovanie ovocia
+        // Spawn ovocia
         game_spawn_fruits(game);
 
-        // Inkrementacia casu
+        // Čas hry
         game->game_time++;
 
-        // Spočítanie aktívnych hráčov
+        // Spočítanie aktívnych hráčov po pohybe
         int active_players = 0;
         for (int i = 0; i < MAX_PLAYERS; i++) {
             if (game->snakes[i].active)
@@ -53,8 +74,8 @@ int main(void) {
         // Ak už nie sú aktívni hráči, ukonči hru
         if (active_players == 0) {
             printf("Vsetci hraci zomreli. Ukoncenie hry.\n");
-            game->running = 0;
-            game->shutdown = 1;  // signal pre klientov
+            game->running = 0;   // klienti ukončia hlavný loop
+            game->shutdown = 1;  // signal pre input vlákna klientov
             sem_post(game_sem);
             break;
         }
@@ -63,12 +84,12 @@ int main(void) {
         usleep(200000); // 200ms medzi krokmi
     }
 
-    // Počkame chvíľu, aby sa klienti stihli odmapovať
+    // ===== 6️⃣ Počkame, aby sa klienti stihli odmapovať =====
     sleep(1);
 
-    // Cleanup shared memory a semaforu
-    ipc_destroy();
-
+    // ===== 7️⃣ Cleanup =====
+    ipc_destroy(); // zmaže shared memory a semafor
     printf("Server ukoncil hru a uvolnil zdroje.\n");
+
     return 0;
 }
