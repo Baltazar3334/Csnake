@@ -43,6 +43,7 @@ typedef struct {
 
     int running;
     int game_time;
+    int shutdown;
     int max_time;
     GameMode mode;
     World world;
@@ -53,6 +54,7 @@ typedef struct {
 int ipc_create();
 SharedGame* ipc_attach();
 void ipc_destroy();
+void ipc_detach(SharedGame *ptr);
 
 extern sem_t *game_sem;
 

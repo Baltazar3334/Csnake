@@ -12,12 +12,13 @@ int my_id = -1; // ID hadíka priradené klientom
 void assign_player() {
     sem_wait(game_sem);
     for (int i = 0; i < MAX_PLAYERS; i++) {
-        if (!game->snakes[i].active) {
-            game->snakes[i].active = 1;
-            game->snakes[i].paused = 0;
-            game->snakes[i].dir = DIR_RIGHT;
-            game->snakes[i].length = 3;
-            game->snakes[i].score = 0;
+        Snake *s = &game->snakes[i];
+        if (!s->active) {
+            s->active = 1;
+            s->paused = 0;
+            s->dir = DIR_RIGHT;
+            s->length = 3;
+            s->score = 0;
             my_id = i;
             break;
         }
@@ -39,8 +40,12 @@ int main(void) {
 
     assign_player();
 
+    // bezpečne posielame my_id do vlákna
+    int *id_copy = malloc(sizeof(int));
+    *id_copy = my_id;
+
     pthread_t tid;
-    pthread_create(&tid, NULL, input_loop, &my_id);
+    pthread_create(&tid, NULL, input_loop, id_copy);
 
     render_init_text();
 
@@ -48,12 +53,18 @@ int main(void) {
         sem_wait(game_sem);
         render_game_text(game, my_id);
         sem_post(game_sem);
-        usleep(200000);
+        usleep(100000); // 10 FPS, plynulejšie
     }
 
     render_cleanup_text();
 
-    printf("Hra skončila.\n");
+    pthread_join(tid, NULL);
+    free(id_copy);
+
+    // bezpečný cleanup
+    ipc_detach(game);
+
+    printf("Klient ukoncil hru.\n");
     return 0;
 }
 

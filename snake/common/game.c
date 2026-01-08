@@ -18,7 +18,6 @@ static int occupied(SharedGame *game, int x, int y) {
 }
 
 void game_spawn_fruits(SharedGame *game) {
-    srand(time(NULL));
     for (int i = 0; i < MAX_FRUITS; i++) {
         do {
             game->fruits[i].x = rand() % MAP_W;
@@ -97,7 +96,9 @@ void game_move_snake(SharedGame *game, int id) {
         if (s->body[0].x == game->fruits[i].x &&
             s->body[0].y == game->fruits[i].y) {
 
-            s->length++;
+            if (s->length < 100) {
+                s->length++;
+            }
             s->score++;
             game_spawn_fruits(game);
             }
