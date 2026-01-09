@@ -2,29 +2,54 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <semaphore.h>
+#include <time.h>
 
 #include "../common/ipc.h"
 #include "../common/game.h"
 
-#define FRUIT_SPAWN_INTERVAL 50 // každých 50 ticov = ~10 sekúnd
+#define FRUIT_SPAWN_INTERVAL 50   // 50 tickov ≈ 10 sekúnd
 #define TICK_USEC 200000          // 200 ms
-#define NO_PLAYER_TIMEOUT 50      // 50 tickov = ~10 sekúnd
+#define NO_PLAYER_TIMEOUT 50      // 10 sekúnd bez hráča
+
+// ===== Pomocné funkcie =====
+
+int fruit_at(SharedGame *game, int x, int y) {
+    for (int i = 0; i < MAX_FRUITS; i++) {
+        if (game->fruits[i].x == x && game->fruits[i].y == y)
+            return 1;
+    }
+    return 0;
+}
+
+int snake_at(SharedGame *game, int x, int y) {
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        Snake *s = &game->snakes[i];
+        if (!s->active) continue;
+
+        for (int j = 0; j < s->length; j++) {
+            if (s->body[j].x == x && s->body[j].y == y)
+                return 1;
+        }
+    }
+    return 0;
+}
+
+// ===== Main =====
 
 int main(void) {
-    // ===== Vytvorenie shared memory a semaforu =====
+    srand(time(NULL));
+
     if (ipc_create() == -1) {
-        fprintf(stderr, "Nepodarilo sa vytvorit shared memory a semafor\n");
+        fprintf(stderr, "Nepodarilo sa vytvorit shared memory\n");
         exit(1);
     }
 
-    // ===== Pripojenie servera k shared memory =====
     SharedGame *game = ipc_attach();
     if (!game) {
-        perror("Pripojenie k shared memory zlyhalo");
+        perror("ipc_attach");
         exit(1);
     }
 
-    // vyber rezimu hry
     int choice = 0;
     int max_time_seconds = 0;
 
@@ -33,21 +58,16 @@ int main(void) {
     printf("2 - Casovy\n");
     printf("Volba: ");
     fflush(stdout);
-
     scanf("%d", &choice);
 
-    // ===== Inicializácia hry =====
     if (choice == 2) {
         printf("Zadaj dlzku hry v sekundach: ");
         fflush(stdout);
         scanf("%d", &max_time_seconds);
 
         game_init(game, MODE_TIME, 0, WORLD_NO_OBSTACLES, NULL);
-
-        // 1 tick = 200 ms → 5 tickov = 1 sekunda
-        game->max_time = max_time_seconds * 5;
-
-        printf("Spustam CASOVY rezim (%d sekund)\n", max_time_seconds);
+        game->max_time = max_time_seconds * 5; // 5 tickov = 1s
+        printf("Spustam CASOVY rezim (%d s)\n", max_time_seconds);
     } else {
         game_init(game, MODE_STANDARD, 0, WORLD_NO_OBSTACLES, NULL);
         printf("Spustam STANDARDNY rezim\n");
@@ -56,14 +76,14 @@ int main(void) {
     game->running = 1;
     game->shutdown = 0;
 
-    // Inicializácia ovocia ako "neaktívne"
+    // inicializácia ovocia
     for (int i = 0; i < MAX_FRUITS; i++) {
         game->fruits[i].x = -1;
         game->fruits[i].y = -1;
     }
 
-    // ===== Čakanie na pripojenie hráčov =====
     printf("Cakam na pripojenie hracov...\n");
+
     int connected = 0;
     while (connected == 0) {
         sem_wait(game_sem);
@@ -73,11 +93,12 @@ int main(void) {
                 connected++;
         }
         sem_post(game_sem);
-        usleep(100000); // 100ms
+        usleep(100000);
     }
+
     printf("%d hraci pripojeni. Spustam hru.\n", connected);
 
-    int spawn_counter = 0; // počítadlo ticov pre spawn ovocia
+    int spawn_counter = 0;
     int no_player_ticks = 0;
 
     while (1) {
@@ -101,28 +122,50 @@ int main(void) {
             }
         }
 
-        // ===== Spawn ovocia každých ~10 sekúnd (1 kus) =====
+        // ===== Spawn ovocia: počet = počet hadíkov =====
         spawn_counter++;
+
         if (spawn_counter >= FRUIT_SPAWN_INTERVAL) {
+
+            int fruit_count = 0;
             for (int i = 0; i < MAX_FRUITS; i++) {
-                if (game->fruits[i].x == -1 && game->fruits[i].y == -1) {
-                    game->fruits[i].x = rand() % MAP_W;
-                    game->fruits[i].y = rand() % MAP_H;
+                if (game->fruits[i].x != -1)
+                    fruit_count++;
+            }
+
+            int needed = active_players - fruit_count;
+
+            for (int k = 0; k < needed; k++) {
+                for (int attempt = 0; attempt < 100; attempt++) {
+
+                    int x = rand() % MAP_W;
+                    int y = rand() % MAP_H;
+
+                    if (snake_at(game, x, y)) continue;
+                    if (fruit_at(game, x, y)) continue;
+
+                    for (int i = 0; i < MAX_FRUITS; i++) {
+                        if (game->fruits[i].x == -1) {
+                            game->fruits[i].x = x;
+                            game->fruits[i].y = y;
+                            break;
+                        }
+                    }
                     break;
                 }
             }
+
             spawn_counter = 0;
         }
 
-        // ===== Čas hry =====
+        // ===== Čas =====
         game->game_time++;
 
-        // ===== HERNÉ REŽIMY =====
+        // ===== Herné režimy =====
         if (game->mode == MODE_STANDARD) {
 
             if (active_players == 0) {
                 no_player_ticks++;
-
                 if (no_player_ticks >= NO_PLAYER_TIMEOUT) {
                     printf("10 sekund bez hracov – koniec hry.\n");
                     game->running = 0;
@@ -130,9 +173,8 @@ int main(void) {
                     sem_post(game_sem);
                     break;
                 }
-
             } else {
-                no_player_ticks = 0; // niekto hrá → reset
+                no_player_ticks = 0;
             }
 
         } else if (game->mode == MODE_TIME) {
@@ -150,12 +192,9 @@ int main(void) {
         usleep(TICK_USEC);
     }
 
-    // ===== Počkame, aby sa klienti stihli odmapovať =====
     sleep(1);
+    ipc_destroy();
 
-    // ===== Cleanup =====
-    ipc_destroy(); // zmaže shared memory a semafor
     printf("Server ukoncil hru a uvolnil zdroje.\n");
-
     return 0;
 }
