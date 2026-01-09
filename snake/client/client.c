@@ -40,7 +40,7 @@ int main(void) {
 
     assign_player();
 
-    // bezpečne posielame my_id do vlákna
+    // ===== Input thread =====
     int *id_copy = malloc(sizeof(int));
     *id_copy = my_id;
 
@@ -49,19 +49,43 @@ int main(void) {
 
     render_init_text();
 
+    // ===== HLAVNÝ RENDER LOOP =====
     while (game->running && game->snakes[my_id].active) {
         sem_wait(game_sem);
         render_game_text(game, my_id);
         sem_post(game_sem);
-        usleep(100000); // 10 FPS, plynulejšie
+        usleep(100000);
     }
 
-    render_cleanup_text();
+    // ===== OBRAZOVKA PO SMRTI =====
+    sem_wait(game_sem);
 
+    int final_score = game->snakes[my_id].score;
+    int server_shutdown = game->shutdown;
+
+    sem_post(game_sem);
+
+    render_cleanup_text();
+    printf("\033[2J\033[H"); // vyčistenie terminálu
+
+    if (!server_shutdown) {
+        printf("\n");
+        printf("******************************\n");
+        printf("*                            *\n");
+        printf("*        Z O M R E L  S I     *\n");
+        printf("*                            *\n");
+        printf("*   Skore: %-6d            *\n", final_score);
+        printf("*                            *\n");
+        printf("******************************\n");
+        printf("\n");
+        printf("Stlac ENTER pre ukoncenie...\n");
+        getchar();
+    }
+
+    // ===== UKONČENIE =====
     pthread_join(tid, NULL);
     free(id_copy);
 
-    // bezpečný cleanup
     ipc_detach(game);
 
     printf("Klient ukoncil hru.\n");
