@@ -17,16 +17,7 @@ static int occupied(SharedGame *game, int x, int y) {
     return 0;
 }
 
-void game_spawn_fruits(SharedGame *game) {
-    for (int i = 0; i < MAX_FRUITS; i++) {
-        do {
-            game->fruits[i].x = rand() % MAP_W;
-            game->fruits[i].y = rand() % MAP_H;
-        } while (occupied(game,
-                 game->fruits[i].x,
-                 game->fruits[i].y));
-    }
-}
+
 
 void game_init(SharedGame *game,
                GameMode mode,
@@ -58,8 +49,8 @@ void game_init(SharedGame *game,
         game->snakes[i].pause_timer = 0;
     }
 
-    /* ===== OVOCIE ===== */
-    game_spawn_fruits(game);
+
+
 }
 
 void game_move_snake(SharedGame *game, int id) {
@@ -100,7 +91,12 @@ void game_move_snake(SharedGame *game, int id) {
                 s->length++;
             }
             s->score++;
-            game_spawn_fruits(game);
+
+            // označíme, že ovocie bolo zjednuté, ale **nenapĺňame nové hneď**
+            game->fruits[i].x = -1;
+            game->fruits[i].y = -1;
+
+            break;  // koniec loopu po zjednutí jedného ovocia
             }
     }
 }
