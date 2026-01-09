@@ -7,6 +7,8 @@
 #include "../common/game.h"
 
 #define FRUIT_SPAWN_INTERVAL 50 // každých 50 ticov = ~10 sekúnd
+#define TICK_USEC 200000          // 200 ms
+#define NO_PLAYER_TIMEOUT 50      // 50 tickov = ~10 sekúnd
 
 int main(void) {
     // ===== Vytvorenie shared memory a semaforu =====
@@ -22,8 +24,35 @@ int main(void) {
         exit(1);
     }
 
+    // vyber rezimu hry
+    int choice = 0;
+    int max_time_seconds = 0;
+
+    printf("Vyber herny rezim:\n");
+    printf("1 - Standardny (10s bez hracov)\n");
+    printf("2 - Casovy\n");
+    printf("Volba: ");
+    fflush(stdout);
+
+    scanf("%d", &choice);
+
     // ===== Inicializácia hry =====
-    game_init(game, MODE_STANDARD, 0, WORLD_NO_OBSTACLES, NULL);
+    if (choice == 2) {
+        printf("Zadaj dlzku hry v sekundach: ");
+        fflush(stdout);
+        scanf("%d", &max_time_seconds);
+
+        game_init(game, MODE_TIME, 0, WORLD_NO_OBSTACLES, NULL);
+
+        // 1 tick = 200 ms → 5 tickov = 1 sekunda
+        game->max_time = max_time_seconds * 5;
+
+        printf("Spustam CASOVY rezim (%d sekund)\n", max_time_seconds);
+    } else {
+        game_init(game, MODE_STANDARD, 0, WORLD_NO_OBSTACLES, NULL);
+        printf("Spustam STANDARDNY rezim\n");
+    }
+
     game->running = 1;
     game->shutdown = 0;
 
@@ -49,16 +78,20 @@ int main(void) {
     printf("%d hraci pripojeni. Spustam hru.\n", connected);
 
     int spawn_counter = 0; // počítadlo ticov pre spawn ovocia
+    int no_player_ticks = 0;
 
-    // ===== Hlavný herný loop =====
     while (1) {
         sem_wait(game_sem);
 
-        // Pohyb hadikov a kontrola kolízií
+        int active_players = 0;
+
+        // ===== Pohyb hadíkov =====
         for (int i = 0; i < MAX_PLAYERS; i++) {
             Snake *s = &game->snakes[i];
             if (!s->active || s->paused)
                 continue;
+
+            active_players++;
 
             game_move_snake(game, i);
 
@@ -68,40 +101,53 @@ int main(void) {
             }
         }
 
-        // ===== Spawn ovocia každých 10 sekúnd, iba 1 fruit =====
+        // ===== Spawn ovocia každých ~10 sekúnd (1 kus) =====
         spawn_counter++;
         if (spawn_counter >= FRUIT_SPAWN_INTERVAL) {
             for (int i = 0; i < MAX_FRUITS; i++) {
                 if (game->fruits[i].x == -1 && game->fruits[i].y == -1) {
                     game->fruits[i].x = rand() % MAP_W;
                     game->fruits[i].y = rand() % MAP_H;
-                    break; // spawn iba 1 fruit
+                    break;
                 }
             }
-            spawn_counter = 0; // reset counter
+            spawn_counter = 0;
         }
 
-        // Čas hry
+        // ===== Čas hry =====
         game->game_time++;
 
-        // Spočítanie aktívnych hráčov
-        int active_players = 0;
-        for (int i = 0; i < MAX_PLAYERS; i++) {
-            if (game->snakes[i].active)
-                active_players++;
-        }
+        // ===== HERNÉ REŽIMY =====
+        if (game->mode == MODE_STANDARD) {
 
-        // Ukončenie hry, ak všetci zomrú
-        if (active_players == 0) {
-            printf("Vsetci hraci zomreli. Ukoncenie hry.\n");
-            game->running = 0;   // klienti ukončia hlavný loop
-            game->shutdown = 1;  // signal pre input vlákna klientov
-            sem_post(game_sem);
-            break;
+            if (active_players == 0) {
+                no_player_ticks++;
+
+                if (no_player_ticks >= NO_PLAYER_TIMEOUT) {
+                    printf("10 sekund bez hracov – koniec hry.\n");
+                    game->running = 0;
+                    game->shutdown = 1;
+                    sem_post(game_sem);
+                    break;
+                }
+
+            } else {
+                no_player_ticks = 0; // niekto hrá → reset
+            }
+
+        } else if (game->mode == MODE_TIME) {
+
+            if (game->game_time >= game->max_time) {
+                printf("Vyprsal herny cas – koniec hry.\n");
+                game->running = 0;
+                game->shutdown = 1;
+                sem_post(game_sem);
+                break;
+            }
         }
 
         sem_post(game_sem);
-        usleep(200000); // 200ms medzi krokmi
+        usleep(TICK_USEC);
     }
 
     // ===== Počkame, aby sa klienti stihli odmapovať =====
