@@ -126,7 +126,17 @@ int main(void) {
         spawn_counter++;
         if (spawn_counter >= FRUIT_SPAWN_INTERVAL) {
 
-            for (int k = 0; k < active_players; k++) {
+            // spočítajme, koľko ovocia momentálne existuje
+            int current_fruits = 0;
+            for (int i = 0; i < MAX_FRUITS; i++) {
+                if (game->fruits[i].x != -1)
+                    current_fruits++;
+            }
+
+            // koľko ovocia ešte treba doplniť
+            int needed = active_players - current_fruits;
+
+            for (int k = 0; k < needed; k++) {
                 for (int attempt = 0; attempt < 100; attempt++) {
 
                     int x = rand() % MAP_W;
@@ -135,6 +145,7 @@ int main(void) {
                     if (snake_at(game, x, y)) continue;
                     if (fruit_at(game, x, y)) continue;
 
+                    // nájdeme prvé prázdne miesto v poli ovocia
                     for (int i = 0; i < MAX_FRUITS; i++) {
                         if (game->fruits[i].x == -1) {
                             game->fruits[i].x = x;
@@ -142,7 +153,7 @@ int main(void) {
                             break;
                         }
                     }
-                    break; // jedno ovocie úspešne spawnuté → prejdeme na ďalšie
+                    break;
                 }
             }
 
