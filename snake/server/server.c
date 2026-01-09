@@ -76,7 +76,7 @@ int main(void) {
     game->running = 1;
     game->shutdown = 0;
 
-    // inicializácia ovocia
+    // inicializácia ovocia ako "neaktívne"
     for (int i = 0; i < MAX_FRUITS; i++) {
         game->fruits[i].x = -1;
         game->fruits[i].y = -1;
@@ -122,20 +122,11 @@ int main(void) {
             }
         }
 
-        // ===== Spawn ovocia: počet = počet hadíkov =====
+        // ===== Spawn ovocia podľa počtu aktívnych hadov každých 10 sekúnd =====
         spawn_counter++;
-
         if (spawn_counter >= FRUIT_SPAWN_INTERVAL) {
 
-            int fruit_count = 0;
-            for (int i = 0; i < MAX_FRUITS; i++) {
-                if (game->fruits[i].x != -1)
-                    fruit_count++;
-            }
-
-            int needed = active_players - fruit_count;
-
-            for (int k = 0; k < needed; k++) {
+            for (int k = 0; k < active_players; k++) {
                 for (int attempt = 0; attempt < 100; attempt++) {
 
                     int x = rand() % MAP_W;
@@ -151,14 +142,14 @@ int main(void) {
                             break;
                         }
                     }
-                    break;
+                    break; // jedno ovocie úspešne spawnuté → prejdeme na ďalšie
                 }
             }
 
             spawn_counter = 0;
         }
 
-        // ===== Čas =====
+        // ===== Čas hry =====
         game->game_time++;
 
         // ===== Herné režimy =====
