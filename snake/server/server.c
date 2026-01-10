@@ -163,18 +163,20 @@ int main(int argc, char **argv) {
     int no_player_ticks = 0;
 
     while (1) {
-        sem_wait(game_sem);
+    sem_wait(game_sem);
 
-        int active_players = 0;
+    int active_players_total = 0;   // všetci pripojení hráči, aj pauznutí
+    int active_players_moving = 0;  // tí, ktorí sa pohybujú
 
-        // ===== Pohyb hadíkov =====
-        for (int i = 0; i < MAX_PLAYERS; i++) {
-            Snake *s = &game->snakes[i];
-            if (!s->active || s->paused)
-                continue;
+    // ===== Pohyb hadíkov =====
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        Snake *s = &game->snakes[i];
+        if (!s->active) continue;
 
-            active_players++;
+        active_players_total++;  // započítame aj pauznutých
 
+        if (!s->paused) {
+            active_players_moving++;
             game_move_snake(game, i);
 
             if (game_check_collision(game, i)) {
@@ -182,82 +184,81 @@ int main(int argc, char **argv) {
                 s->active = 0;
             }
         }
+    }
 
-        // ===== Spawn ovocia podľa počtu aktívnych hadov každých 10 sekúnd =====
-        spawn_counter++;
-        if (spawn_counter >= FRUIT_SPAWN_INTERVAL) {
+    // ===== Spawn ovocia každých 10 sekúnd podľa pohybujúcich sa hadov =====
+    spawn_counter++;
+    if (spawn_counter >= FRUIT_SPAWN_INTERVAL) {
 
-            // spočítajme, koľko ovocia momentálne existuje
-            int current_fruits = 0;
-            for (int i = 0; i < MAX_FRUITS; i++) {
-                if (game->fruits[i].x != -1)
-                    current_fruits++;
-            }
-
-            // koľko ovocia ešte treba doplniť
-            int needed = active_players - current_fruits;
-
-            for (int k = 0; k < needed; k++) {
-                int found = 0;
-
-                for (int attempt = 0; attempt < 1000; attempt++) {  // viac pokusov pre väčšie mapy
-                    int x = rand() % game->world.width;
-                    int y = rand() % game->world.height;
-
-                    if (snake_at(game, x, y)) continue;        // kontrola hada
-                    if (fruit_at(game, x, y)) continue;        // kontrola iného ovocia
-                    if (world_is_wall(&game->world, x, y)) continue; // kontrola prekážky
-
-                    // našli sme bezpečné miesto
-                    for (int i = 0; i < MAX_FRUITS; i++) {
-                        if (game->fruits[i].x == -1) {
-                            game->fruits[i].x = x;
-                            game->fruits[i].y = y;
-                            found = 1;
-                            break;
-                        }
-                    }
-
-                    if (found) break;
-                }
-            }
-
-            spawn_counter = 0;
+        // spočítajme, koľko ovocia momentálne existuje
+        int current_fruits = 0;
+        for (int i = 0; i < MAX_FRUITS; i++) {
+            if (game->fruits[i].x != -1)
+                current_fruits++;
         }
 
-        // ===== Čas hry =====
-        game->game_time++;
+        // koľko ovocia ešte treba doplniť podľa pohybujúcich sa hadov
+        int needed = active_players_moving - current_fruits;
 
-        // ===== Herné režimy =====
-        if (game->mode == MODE_STANDARD) {
+        for (int k = 0; k < needed; k++) {
+            int found = 0;
 
-            if (active_players == 0) {
-                no_player_ticks++;
-                if (no_player_ticks >= NO_PLAYER_TIMEOUT) {
-                    printf("10 sekund bez hracov – koniec hry.\n");
-                    game->running = 0;
-                    game->shutdown = 1;
-                    sem_post(game_sem);
-                    break;
+            for (int attempt = 0; attempt < 1000; attempt++) {
+                int x = rand() % game->world.width;
+                int y = rand() % game->world.height;
+
+                if (snake_at(game, x, y)) continue;
+                if (fruit_at(game, x, y)) continue;
+                if (world_is_wall(&game->world, x, y)) continue;
+
+                for (int i = 0; i < MAX_FRUITS; i++) {
+                    if (game->fruits[i].x == -1) {
+                        game->fruits[i].x = x;
+                        game->fruits[i].y = y;
+                        found = 1;
+                        break;
+                    }
                 }
-            } else {
-                no_player_ticks = 0;
+
+                if (found) break;
             }
+        }
 
-        } else if (game->mode == MODE_TIME) {
+        spawn_counter = 0;
+    }
 
-            if (game->game_time >= game->max_time) {
-                printf("Vyprsal herny cas – koniec hry.\n");
+    // ===== Čas hry =====
+    game->game_time++;
+
+    // ===== Herné režimy =====
+    if (game->mode == MODE_STANDARD) {
+        // koniec hry len ak nie sú žiadni aktívni hráči (ani pauznutí)
+        if (active_players_total == 0) {
+            no_player_ticks++;
+            if (no_player_ticks >= NO_PLAYER_TIMEOUT) {
+                printf("10 sekund bez hracov – koniec hry.\n");
                 game->running = 0;
                 game->shutdown = 1;
                 sem_post(game_sem);
                 break;
             }
+        } else {
+            no_player_ticks = 0;
         }
 
-        sem_post(game_sem);
-        usleep(TICK_USEC);
+    } else if (game->mode == MODE_TIME) {
+        if (game->game_time >= game->max_time) {
+            printf("Vyprsal herny cas – koniec hry.\n");
+            game->running = 0;
+            game->shutdown = 1;
+            sem_post(game_sem);
+            break;
+        }
     }
+
+    sem_post(game_sem);
+    usleep(TICK_USEC);
+}
 
     sleep(1);
     ipc_destroy(server_name);
