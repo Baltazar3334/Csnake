@@ -4,21 +4,6 @@
 #include "world.h"
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-
-static int occupied(SharedGame *game, int x, int y) {
-    for (int i = 0; i < MAX_PLAYERS; i++) {
-        if (!game->snakes[i].active) continue;
-        for (int j = 0; j < game->snakes[i].length; j++) {
-            if (game->snakes[i].body[j].x == x &&
-                game->snakes[i].body[j].y == y)
-                return 1;
-        }
-    }
-    return 0;
-}
-
-
 
 void game_init(SharedGame *game,
                GameMode mode,

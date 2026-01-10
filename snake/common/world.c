@@ -5,9 +5,23 @@
 #include <string.h>
 
 int world_load(World *w, const char *filename) {
-    FILE *f = fopen(filename, "r");
+    char path[512];
+
+    if (strstr(filename, "/") || strstr(filename, "..")) {
+        printf("Neplatny nazov mapy, piste len meno nie cestu\n");
+        return 0;
+    }
+
+    // citanie zo suboru
+    if (strstr(filename, ".txt")) {
+        snprintf(path, sizeof(path), "../snake/maps/%s", filename);
+    } else {
+        snprintf(path, sizeof(path), "../snake/maps/%s.txt", filename);
+    }
+
+    FILE *f = fopen(path, "r");
     if (!f) {
-        printf("subor sa nenasiel \n");
+        printf("Subor '%s' sa nenasiel\n", path);
         return 0;
     }
 
@@ -28,6 +42,20 @@ int world_load(World *w, const char *filename) {
 
     w->height = h;
     fclose(f);
+    return 1;
+}
+
+int world_is_safe_spawn(World *w, int x, int y) {
+    // kontrola okolia 3x3 ci je bezpecne na spawn hadika
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            int nx = x + dx;
+            int ny = y + dy;
+
+            if (world_is_wall(w, nx, ny))
+                return 0;
+        }
+    }
     return 1;
 }
 
