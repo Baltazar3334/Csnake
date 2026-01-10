@@ -50,6 +50,13 @@ int main(void) {
         exit(1);
     }
 
+    sem_wait(game_sem);
+    for (int i = 0; i < MAX_FRUITS; i++) {
+        game->fruits[i].x = -1;
+        game->fruits[i].y = -1;
+    }
+    sem_post(game_sem);
+
     int choice = 0;
     int max_time_seconds = 0;
 
