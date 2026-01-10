@@ -127,8 +127,19 @@ int main(int argc, char **argv) {
         printf("*   Skóre: %-6d            *\n", final_score);
         printf("*                            *\n");
         printf("******************************\n");
-        printf("\nStlač ENTER pre ukončenie...\n");
-        getchar();
+        printf("Stlač ENTER pre ukončenie alebo 'x' pre opätovné pripojenie...\n");
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
+        c = getchar();
+        if (c == 'x' || c == 'X') {
+            printf("Pokúšam sa znovu pripojiť...\n");
+            assign_player(); // funkcia na opätovné priradenie hráča
+            // tu môžeš reštartovať input a render loop
+        } else {
+            // ENTER alebo iný kláves → ukončenie klienta
+            ipc_detach(game);
+            printf("Klient ukončil hru.\n");
+        }
     } else if (time_up) {
         // vypršal čas
         printf("\n");
