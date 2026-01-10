@@ -47,6 +47,7 @@ typedef struct {
     int running;
     int game_time;
     int shutdown;
+    int time_up;
     int max_time;
     GameMode mode;
     World world;

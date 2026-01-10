@@ -16,6 +16,7 @@ void game_init(SharedGame *game,
     game->game_time = 0;
     game->running = 1;
     game->world_type = wtype;
+    game->time_up = 0;
 
     /* ===== SVET ===== */
     if (wtype == WORLD_WITH_OBSTACLES) {

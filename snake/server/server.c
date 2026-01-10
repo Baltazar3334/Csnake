@@ -251,6 +251,7 @@ int main(int argc, char **argv) {
             printf("Vyprsal herny cas – koniec hry.\n");
             game->running = 0;
             game->shutdown = 1;
+            game->time_up = 1;
             sem_post(game_sem);
             break;
         }
