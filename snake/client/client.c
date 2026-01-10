@@ -18,7 +18,7 @@ void assign_player() {
             int x, y;
             int found = 0;
 
-            // bezpecne miesto na spawn
+            // bezpečné miesto na spawn
             for (int attempt = 0; attempt < 1000; attempt++) {
                 x = rand() % game->world.width;
                 y = rand() % game->world.height;
@@ -31,7 +31,7 @@ void assign_player() {
 
             if (!found) {
                 sem_post(game_sem);
-                printf("Nenaslo sa bezpecne miesto pre hada!\n");
+                printf("Nenaslo sa bezpečné miesto pre hada!\n");
                 exit(1);
             }
 
@@ -58,17 +58,35 @@ void assign_player() {
     sem_post(game_sem);
 
     if (my_id == -1) {
-        printf("Vsetky miesta pre hracov su obsadene!\n");
+        printf("Všetky miesta pre hráčov sú obsadené!\n");
         exit(1);
     }
 }
 
-int main(void) {
-    game = ipc_attach();
+int main(int argc, char **argv) {
+    if (argc < 2) {
+        printf("Použitie: %s <server_name>\n", argv[0]);
+        return 1;
+    }
+
+    const char *server_name = argv[1];
+    srand(time(NULL));
+
+    // Pripojenie ku serveru
+    game = ipc_attach(server_name);
     if (!game) {
         perror("Pripojenie k serveru zlyhalo");
         exit(1);
     }
+
+#ifdef MAGIC_ID
+    // kontrola integrity servera
+    if (game->magic != MAGIC_ID) {
+        printf("Neplatny alebo zastaraly server.\n");
+        ipc_detach(game);
+        exit(1);
+    }
+#endif
 
     assign_player();
 
@@ -91,10 +109,8 @@ int main(void) {
 
     // ===== OBRAZOVKA PO SMRTI =====
     sem_wait(game_sem);
-
     int final_score = game->snakes[my_id].score;
     int server_shutdown = game->shutdown;
-
     sem_post(game_sem);
 
     render_cleanup_text();
@@ -106,21 +122,20 @@ int main(void) {
         printf("*                            *\n");
         printf("*        Z O M R E L  S I    *\n");
         printf("*                            *\n");
-        printf("*   Skore: %-6d            *\n", final_score);
+        printf("*   Skóre: %-6d            *\n", final_score);
         printf("*                            *\n");
         printf("******************************\n");
         printf("\n");
-        printf("Stlac ENTER pre ukoncenie...\n");
+        printf("Stlač ENTER pre ukončenie...\n");
         getchar();
     }
 
     // ===== UKONČENIE =====
     pthread_join(tid, NULL);
     free(id_copy);
-
     ipc_detach(game);
 
-    printf("Klient ukoncil hru.\n");
+    printf("Klient ukončil hru.\n");
     return 0;
 }
 

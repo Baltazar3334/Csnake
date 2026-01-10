@@ -28,24 +28,40 @@ int ipc_create(const char* server_name) {
         return -1;
     }
 
+    SharedGame *game = mmap(NULL, sizeof(SharedGame),
+                            PROT_READ | PROT_WRITE,
+                            MAP_SHARED, fd, 0);
+    if (game == MAP_FAILED) {
+        perror("mmap server");
+        close(fd);
+        return -1;
+    }
+
+    // Nastavíme magic ID a vyčistíme shared memory
+    memset(game, 0, sizeof(SharedGame));
+    game->magic = MAGIC_ID;
+
     // Vytvorenie semaforu
     game_sem = sem_open(sem_name, O_CREAT | O_EXCL, 0666, 1);
     if (game_sem == SEM_FAILED) {
         if (errno == EEXIST) {
-            // už existuje → pripoj sa
+            // semafor už existuje, pripoj sa
             game_sem = sem_open(sem_name, 0);
             if (game_sem == SEM_FAILED) {
                 perror("sem_open existujuce");
+                munmap(game, sizeof(SharedGame));
                 close(fd);
                 return -1;
             }
         } else {
             perror("sem_open");
+            munmap(game, sizeof(SharedGame));
             close(fd);
             return -1;
         }
     }
 
+    munmap(game, sizeof(SharedGame));
     close(fd); // fd už nepotrebujeme po ftruncate
     return 0;
 }
@@ -72,7 +88,14 @@ SharedGame* ipc_attach(const char* server_name) {
         return NULL;
     }
 
-    close(fd); // fd už nepotrebujeme po mmap
+    close(fd);
+
+    // overíme magic ID
+    if (ptr->magic != MAGIC_ID) {
+        fprintf(stderr, "Shared memory nepatri tomuto serveru!\n");
+        munmap(ptr, sizeof(SharedGame));
+        return NULL;
+    }
 
     // Pripojenie na existujúci semafor
     game_sem = sem_open(sem_name, 0);
