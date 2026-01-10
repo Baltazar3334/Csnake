@@ -6,7 +6,10 @@
 
 int world_load(World *w, const char *filename) {
     FILE *f = fopen(filename, "r");
-    if (!f) return 0;
+    if (!f) {
+        printf("subor sa nenasiel \n");
+        return 0;
+    }
 
     char line[MAX_W + 2];
     int h = 0;
