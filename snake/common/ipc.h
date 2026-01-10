@@ -22,6 +22,7 @@ typedef struct {
     int paused;
     int pause_timer;
     int score;
+    int invincible;
     int length;
     Direction dir;
     Point body[100];
