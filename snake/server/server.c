@@ -67,7 +67,7 @@ int main(void) {
     fflush(stdout);
     scanf("%d", &choice);
 
-    // ===== NOVÝ: výber typu sveta =====
+    // ===== výber typu sveta =====
     int choice_world = 0;
     char mapfile[256] = {0};
     printf("Vyber typ sveta:\n");
@@ -79,14 +79,35 @@ int main(void) {
 
     WorldType wtype = (choice_world == 2) ? WORLD_WITH_OBSTACLES : WORLD_NO_OBSTACLES;
 
-    // ak svet s prekážkami → voliteľne načítanie mapy
     if (wtype == WORLD_WITH_OBSTACLES) {
-        printf("Zadaj nazov suboru s mapou (prazdne = generovat nahodne): ");
+        int choice_map = 0;
+        printf("Ako chces ziskat svet s prekazkami?\n");
+        printf("1 - Nahodne generovanie\n");
+        printf("2 - Nacitat z mapoveho suboru\n");
+        printf("Volba: ");
         fflush(stdout);
-        scanf("%s", mapfile);
-        if (strlen(mapfile) == 0) {
-            mapfile[0] = 0; // nebude nacitavat, bude generovat nahodne
+        scanf("%d", &choice_map);
+
+        if (choice_map == 2) {
+            printf("Zadaj nazov mapoveho suboru: ");
+            fflush(stdout);
+            scanf("%s", mapfile);
+
+            if (!world_load(&game->world, mapfile)) {
+                printf("Chyba pri nacitani mapy, koncim.\n");
+                exit(1);
+            }
+            printf("Mapa nacitana zo suboru '%s'\n", mapfile);
+        } else {
+            // nahodne generovanie
+            world_random_generate(&game->world);
+            printf("Generujem nahodny svet s prekazkami...\n");
         }
+    } else {
+        // svet bez prekážok
+        game->world.width = MAP_W;
+        game->world.height = MAP_H;
+        printf("Pouzivam svet bez prekazok.\n");
     }
 
     if (choice == 2) {
