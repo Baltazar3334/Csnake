@@ -67,6 +67,28 @@ int main(void) {
     fflush(stdout);
     scanf("%d", &choice);
 
+    // ===== NOVÝ: výber typu sveta =====
+    int choice_world = 0;
+    char mapfile[256] = {0};
+    printf("Vyber typ sveta:\n");
+    printf("1 - Svet bez prekazok\n");
+    printf("2 - Svet s prekazkami (moze sa nacitat z mapy alebo generovat)\n");
+    printf("Volba: ");
+    fflush(stdout);
+    scanf("%d", &choice_world);
+
+    WorldType wtype = (choice_world == 2) ? WORLD_WITH_OBSTACLES : WORLD_NO_OBSTACLES;
+
+    // ak svet s prekážkami → voliteľne načítanie mapy
+    if (wtype == WORLD_WITH_OBSTACLES) {
+        printf("Zadaj nazov suboru s mapou (prazdne = generovat nahodne): ");
+        fflush(stdout);
+        scanf("%s", mapfile);
+        if (strlen(mapfile) == 0) {
+            mapfile[0] = 0; // nebude nacitavat, bude generovat nahodne
+        }
+    }
+
     if (choice == 2) {
         printf("Zadaj dlzku hry v sekundach: ");
         fflush(stdout);
@@ -79,6 +101,8 @@ int main(void) {
         game_init(game, MODE_STANDARD, 0, WORLD_NO_OBSTACLES, NULL);
         printf("Spustam STANDARDNY rezim\n");
     }
+
+
 
     game->running = 1;
     game->shutdown = 0;

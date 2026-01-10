@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "world.h"
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 static int occupied(SharedGame *game, int x, int y) {
@@ -33,13 +34,21 @@ void game_init(SharedGame *game,
 
     /* ===== SVET ===== */
     if (wtype == WORLD_WITH_OBSTACLES) {
-        if (!world_load(&game->world, mapfile)) {
-            printf("Chyba pri nacitani mapy\n");
-            exit(1);
+        if (mapfile) {
+            // načítanie mapy zo súboru
+            if (!world_load(&game->world, mapfile)) {
+                printf("Chyba pri nacitani mapy\n");
+                exit(1);
+            }
+        } else {
+            // náhodná generácia sveta so statickými prekážkami
+            world_random_generate(&game->world);
         }
     } else {
         game->world.width = MAP_W;
         game->world.height = MAP_H;
+        // bez prekážok → všetky polia prístupné
+        memset(game->world.cells, 0, sizeof(game->world.cells));
     }
 
     /* ===== HRÁČI ===== */
@@ -47,6 +56,7 @@ void game_init(SharedGame *game,
         game->snakes[i].active = 0;
         game->snakes[i].paused = 0;
         game->snakes[i].pause_timer = 0;
+        game->snakes[i].length = 1;
     }
 
 
