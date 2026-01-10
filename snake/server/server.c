@@ -189,23 +189,27 @@ int main(void) {
             int needed = active_players - current_fruits;
 
             for (int k = 0; k < needed; k++) {
-                for (int attempt = 0; attempt < 100; attempt++) {
+                int found = 0;
 
-                    int x = rand() % MAP_W;
-                    int y = rand() % MAP_H;
+                for (int attempt = 0; attempt < 1000; attempt++) {  // viac pokusov pre väčšie mapy
+                    int x = rand() % game->world.width;
+                    int y = rand() % game->world.height;
 
-                    if (snake_at(game, x, y)) continue;
-                    if (fruit_at(game, x, y)) continue;
+                    if (snake_at(game, x, y)) continue;        // kontrola hada
+                    if (fruit_at(game, x, y)) continue;        // kontrola iného ovocia
+                    if (world_is_wall(&game->world, x, y)) continue; // kontrola prekážky
 
-                    // nájdeme prvé prázdne miesto v poli ovocia
+                    // našli sme bezpečné miesto
                     for (int i = 0; i < MAX_FRUITS; i++) {
                         if (game->fruits[i].x == -1) {
                             game->fruits[i].x = x;
                             game->fruits[i].y = y;
+                            found = 1;
                             break;
                         }
                     }
-                    break;
+
+                    if (found) break;
                 }
             }
 
