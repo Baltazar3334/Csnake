@@ -63,9 +63,9 @@ void render_game_text(SharedGame *game, int id) {
     else if (me->pause_timer > 0)
         printf("Navrat do hry za %d s\n", me->pause_timer);
     else if (game->mode == MODE_TIME)
-        printf("Ovladanie: [WASD] | Ukoncenie: [Q] | Pauza: [P] | Score: %d | Cas do konca: %d s\n", me->score, game->max_time - game->game_time);
+        printf("Ovladanie: [WASD] | Ukoncenie: [Q] | Pauza: [P] | Score: %d | Cas do konca: %d s\n", me->score, (game->max_time - game->game_time)/5);
     else
-        printf("Ovladanie: [WASD] | Ukoncenie: [Q] | Pauza: [P] | Score: %d | Cas hry: %d s\n", me->score, game->game_time);
+        printf("Ovladanie: [WASD] | Ukoncenie: [Q] | Pauza: [P] | Score: %d | Cas hry: %d s\n", (me->score, game->game_time)/5);
 
     fflush(stdout);
 }
