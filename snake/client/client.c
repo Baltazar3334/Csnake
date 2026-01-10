@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <string.h>
 #include "../common/ipc.h"
 #include "../client/input.h"
 #include "../client/render_text.h"
@@ -18,7 +19,6 @@ void assign_player() {
             int x, y;
             int found = 0;
 
-            // bezpečné miesto na spawn
             for (int attempt = 0; attempt < 1000; attempt++) {
                 x = rand() % game->world.width;
                 y = rand() % game->world.height;
@@ -31,7 +31,7 @@ void assign_player() {
 
             if (!found) {
                 sem_post(game_sem);
-                printf("Nenaslo sa bezpečné miesto pre hada!\n");
+                printf("Nenašlo sa bezpečné miesto pre hada!\n");
                 exit(1);
             }
 
@@ -80,90 +80,78 @@ int main(int argc, char **argv) {
     }
 
 #ifdef MAGIC_ID
-    // kontrola integrity servera
     if (game->magic != MAGIC_ID) {
-        printf("Neplatny alebo zastaraly server.\n");
+        printf("Neplatný alebo zastaralý server.\n");
         ipc_detach(game);
         exit(1);
     }
 #endif
 
-    assign_player();
+    int keep_playing = 1;
 
-    // ===== Input thread =====
-    int *id_copy = malloc(sizeof(int));
-    *id_copy = my_id;
+    while (keep_playing && !game->shutdown) {
+        assign_player();
 
-    pthread_t tid;
-    pthread_create(&tid, NULL, input_loop, id_copy);
+        // ===== Input thread =====
+        int *id_copy = malloc(sizeof(int));
+        *id_copy = my_id;
+        pthread_t tid;
+        pthread_create(&tid, NULL, input_loop, id_copy);
 
-    render_init_text();
+        render_init_text();
 
-    // ===== HLAVNÝ RENDER LOOP =====
-    while (game->running && game->snakes[my_id].active) {
+        // ===== Hlavný render loop =====
+        while (game->running && game->snakes[my_id].active) {
+            sem_wait(game_sem);
+            render_game_text(game, my_id);
+            sem_post(game_sem);
+            usleep(100000);
+        }
+
+        // ===== Po smrti alebo konci hry =====
         sem_wait(game_sem);
-        render_game_text(game, my_id);
+        int final_score = game->snakes[my_id].score;
+        int server_shutdown = game->shutdown;
+        int game_mode = game->mode;
         sem_post(game_sem);
-        usleep(100000);
-    }
 
-    // ===== OBRAZOVKA PO SMRTI alebo KONCI ČASU =====
-    sem_wait(game_sem);
-    int final_score = game->snakes[my_id].score;
-    int server_shutdown = game->shutdown;
-    int time_up = game->time_up;  // nový flag
-    sem_post(game_sem);
+        // ukonči input thread
+        pthread_cancel(tid);
+        pthread_join(tid, NULL);
+        free(id_copy);
 
-    render_cleanup_text();
-    printf("\033[2J\033[H"); // vyčistenie terminálu
+        render_cleanup_text();
+        printf("\033[2J\033[H"); // vyčistenie terminálu
 
-    if (!server_shutdown) {
-        // hráč zomrel
-        printf("\n");
-        printf("******************************\n");
+        if (server_shutdown) break;
+
+        printf("\n******************************\n");
         printf("*                            *\n");
-        printf("*        Z O M R E L  S I    *\n");
-        printf("*                            *\n");
+        if (!game->snakes[my_id].active) {
+            printf("*       Z O M R E L  S I     *\n");
+        } else if (game_mode == MODE_TIME) {
+            printf("*   HRA SKONČILA – VYPRŠAL ČAS *\n");
+        } else {
+            printf("*       HRA SKONČILA         *\n");
+        }
         printf("*   Skóre: %-6d            *\n", final_score);
-        printf("*                            *\n");
         printf("******************************\n");
-        printf("Stlač ENTER pre ukončenie alebo 'x' pre opätovné pripojenie...\n");
+        printf("\nStlač ENTER pre ukončenie alebo 'x' pre opätovné pripojenie...\n");
+
+        // vyčisti buffer po predchádzajúcich vstupoch
         int c;
         while ((c = getchar()) != '\n' && c != EOF);
         c = getchar();
+
         if (c == 'x' || c == 'X') {
-            printf("Pokúšam sa znovu pripojiť...\n");
-            assign_player(); // funkcia na opätovné priradenie hráča
-            // tu môžeš reštartovať input a render loop
+            my_id = -1; // reset id
+            continue;   // znovu sa pripojiť
         } else {
-            // ENTER alebo iný kláves → ukončenie klienta
-            ipc_detach(game);
-            printf("Klient ukončil hru.\n");
+            keep_playing = 0; // ukonči klienta
         }
-    } else if (time_up) {
-        // vypršal čas
-        printf("\n");
-        printf("******************************\n");
-        printf("*                            *\n");
-        printf("*       HRA SKONCILA         *\n");
-        printf("*      VYPRŠAL ČAS!          *\n");
-        printf("*                            *\n");
-        printf("*   Skóre: %-6d            *\n", final_score);
-        printf("******************************\n");
-        int c;
-        while ((c = getchar()) != '\n' && c != EOF); //odstrani vsetky znaky ktore zostali po predchadzajucom volani
-        printf("\nStlač ENTER pre ukončenie...\n");
-        getchar();
-    } else {
-        // server vypol hru iným spôsobom
-        printf("\nHra bola ukončená serverom.\n");
     }
 
-    // ===== UKONČENIE =====
-    pthread_join(tid, NULL);
-    free(id_copy);
     ipc_detach(game);
-
     printf("Klient ukončil hru.\n");
     return 0;
 }
