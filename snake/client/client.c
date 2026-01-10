@@ -104,7 +104,7 @@ int main(void) {
         printf("\n");
         printf("******************************\n");
         printf("*                            *\n");
-        printf("*        Z O M R E L  S I     *\n");
+        printf("*        Z O M R E L  S I    *\n");
         printf("*                            *\n");
         printf("*   Skore: %-6d            *\n", final_score);
         printf("*                            *\n");
