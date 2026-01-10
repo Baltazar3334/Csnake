@@ -57,9 +57,9 @@ int main(void) {
     }
     sem_post(game_sem);
 
+    // ===== Výber herného režimu =====
     int choice = 0;
     int max_time_seconds = 0;
-
     printf("Vyber herny rezim:\n");
     printf("1 - Standardny (10s bez hracov)\n");
     printf("2 - Casovy\n");
@@ -67,7 +67,7 @@ int main(void) {
     fflush(stdout);
     scanf("%d", &choice);
 
-    // ===== výber typu sveta =====
+    // ===== Výber typu sveta =====
     int choice_world = 0;
     char mapfile[256] = {0};
     printf("Vyber typ sveta:\n");
@@ -79,6 +79,7 @@ int main(void) {
 
     WorldType wtype = (choice_world == 2) ? WORLD_WITH_OBSTACLES : WORLD_NO_OBSTACLES;
 
+    // Ak hráč chce svet s prekážkami → výber súboru alebo náhodné generovanie
     if (wtype == WORLD_WITH_OBSTACLES) {
         int choice_map = 0;
         printf("Ako chces ziskat svet s prekazkami?\n");
@@ -99,7 +100,7 @@ int main(void) {
             }
             printf("Mapa nacitana zo suboru '%s'\n", mapfile);
         } else {
-            // nahodne generovanie
+            // náhodné generovanie
             world_random_generate(&game->world);
             printf("Generujem nahodny svet s prekazkami...\n");
         }
@@ -107,23 +108,22 @@ int main(void) {
         // svet bez prekážok
         game->world.width = MAP_W;
         game->world.height = MAP_H;
+        memset(game->world.cells, 0, sizeof(game->world.cells));
         printf("Pouzivam svet bez prekazok.\n");
     }
 
+    // ===== Inicializácia hry =====
     if (choice == 2) {
         printf("Zadaj dlzku hry v sekundach: ");
         fflush(stdout);
         scanf("%d", &max_time_seconds);
 
-        game_init(game, MODE_TIME, 0, WORLD_NO_OBSTACLES, NULL);
-        game->max_time = max_time_seconds * 5; // 5 tickov = 1s
+        game_init(game, MODE_TIME, max_time_seconds * 5, wtype, (mapfile[0] != 0) ? mapfile : NULL);
         printf("Spustam CASOVY rezim (%d s)\n", max_time_seconds);
     } else {
-        game_init(game, MODE_STANDARD, 0, WORLD_NO_OBSTACLES, NULL);
+        game_init(game, MODE_STANDARD, 0, wtype, (mapfile[0] != 0) ? mapfile : NULL);
         printf("Spustam STANDARDNY rezim\n");
     }
-
-
 
     game->running = 1;
     game->shutdown = 0;

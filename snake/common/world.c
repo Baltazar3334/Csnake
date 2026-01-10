@@ -43,7 +43,7 @@ void world_random_generate(World *w) {
 
     // vložíme pevné prekážky, napr. 20% mapy
     int total_cells = w->width * w->height;
-    int obstacles = total_cells / 5;
+    int obstacles = total_cells / 25;
 
     for (int i = 0; i < obstacles; i++) {
         int x, y;
