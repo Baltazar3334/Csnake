@@ -85,7 +85,7 @@ void world_random_generate(World *w) {
 
     // vložíme pevné prekážky
     int total_cells = w->width * w->height;
-    int obstacles = total_cells / 25;
+    int obstacles = total_cells / 50;
 
     for (int i = 0; i < obstacles; i++) {
         int x, y;
