@@ -107,16 +107,18 @@ int main(int argc, char **argv) {
         usleep(100000);
     }
 
-    // ===== OBRAZOVKA PO SMRTI =====
+    // ===== OBRAZOVKA PO SMRTI alebo KONCI ČASU =====
     sem_wait(game_sem);
     int final_score = game->snakes[my_id].score;
     int server_shutdown = game->shutdown;
+    int time_up = game->time_up;  // nový flag
     sem_post(game_sem);
 
     render_cleanup_text();
     printf("\033[2J\033[H"); // vyčistenie terminálu
 
     if (!server_shutdown) {
+        // hráč zomrel
         printf("\n");
         printf("******************************\n");
         printf("*                            *\n");
@@ -125,9 +127,23 @@ int main(int argc, char **argv) {
         printf("*   Skóre: %-6d            *\n", final_score);
         printf("*                            *\n");
         printf("******************************\n");
-        printf("\n");
-        printf("Stlač ENTER pre ukončenie...\n");
+        printf("\nStlač ENTER pre ukončenie...\n");
         getchar();
+    } else if (time_up) {
+        // vypršal čas
+        printf("\n");
+        printf("******************************\n");
+        printf("*                            *\n");
+        printf("*       HRA SKONCILA         *\n");
+        printf("*      VYPRŠAL ČAS!          *\n");
+        printf("*                            *\n");
+        printf("*   Skóre: %-6d            *\n", final_score);
+        printf("******************************\n");
+        printf("\nStlač ENTER pre ukončenie...\n");
+        getchar();
+    } else {
+        // server vypol hru iným spôsobom
+        printf("\nHra bola ukončená serverom.\n");
     }
 
     // ===== UKONČENIE =====
