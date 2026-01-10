@@ -5,9 +5,23 @@
 #include <string.h>
 
 int world_load(World *w, const char *filename) {
-    FILE *f = fopen(filename, "r");
+    char path[512];
+
+    if (strstr(filename, "/") || strstr(filename, "..")) {
+        printf("Neplatny nazov mapy, piste len meno nie cestu\n");
+        return 0;
+    }
+
+    // citanie zo suboru
+    if (strstr(filename, ".txt")) {
+        snprintf(path, sizeof(path), "../snake/maps/%s", filename);
+    } else {
+        snprintf(path, sizeof(path), "../snake/maps/%s.txt", filename);
+    }
+
+    FILE *f = fopen(path, "r");
     if (!f) {
-        printf("subor sa nenasiel \n");
+        printf("Subor '%s' sa nenasiel\n", path);
         return 0;
     }
 
@@ -31,6 +45,20 @@ int world_load(World *w, const char *filename) {
     return 1;
 }
 
+int world_is_safe_spawn(World *w, int x, int y) {
+    // kontrola okolia 3x3 ci je bezpecne na spawn hadika
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            int nx = x + dx;
+            int ny = y + dy;
+
+            if (world_is_wall(w, nx, ny))
+                return 0;
+        }
+    }
+    return 1;
+}
+
 int world_is_wall(World *w, int x, int y) {
     if (x < 0 || y < 0 || x >= w->width || y >= w->height)
         return 1;
@@ -41,19 +69,30 @@ void world_random_generate(World *w) {
     w->width = MAP_W;
     w->height = MAP_H;
 
-    // najprv všetko voľné
+    // uvolnenie celej mapy
     memset(w->cells, 0, sizeof(w->cells));
 
-    // vložíme pevné prekážky, napr. 20% mapy
+    // ===== HRANICE MAPY = STENY =====
+    for (int x = 0; x < w->width; x++) {
+        w->cells[0][x] = 1;                 // horná stena
+        w->cells[w->height - 1][x] = 1;     // dolná stena
+    }
+
+    for (int y = 0; y < w->height; y++) {
+        w->cells[y][0] = 1;                 // ľavá stena
+        w->cells[y][w->width - 1] = 1;      // pravá stena
+    }
+
+    // vložíme pevné prekážky
     int total_cells = w->width * w->height;
     int obstacles = total_cells / 25;
 
     for (int i = 0; i < obstacles; i++) {
         int x, y;
         do {
-            x = rand() % w->width;
-            y = rand() % w->height;
-        } while (w->cells[y][x] != 0); // už je obsadené
+            x = 1 + rand() % (w->width - 2);
+            y = 1 + rand() % (w->height - 2);
+        } while (w->cells[y][x] != 0); // už je obsadené aby generator neprepisoval hranice mapy
 
         w->cells[y][x] = 1; // 1 = prekážka
     }

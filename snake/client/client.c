@@ -5,6 +5,7 @@
 #include "../common/ipc.h"
 #include "../client/input.h"
 #include "../client/render_text.h"
+#include "../common/world.h"
 
 SharedGame *game = NULL;
 int my_id = -1; // ID hadíka priradené klientom
@@ -14,11 +15,42 @@ void assign_player() {
     for (int i = 0; i < MAX_PLAYERS; i++) {
         Snake *s = &game->snakes[i];
         if (!s->active) {
+            int x, y;
+            int found = 0;
+
+            // bezpecne miesto na spawn
+            for (int attempt = 0; attempt < 1000; attempt++) {
+                x = rand() % game->world.width;
+                y = rand() % game->world.height;
+
+                if (world_is_safe_spawn(&game->world, x, y)) {
+                    found = 1;
+                    break;
+                }
+            }
+
+            if (!found) {
+                sem_post(game_sem);
+                printf("Nenaslo sa bezpecne miesto pre hada!\n");
+                exit(1);
+            }
+
             s->active = 1;
             s->paused = 0;
             s->dir = DIR_RIGHT;
             s->length = 3;
             s->score = 0;
+
+            // HLAVA
+            s->body[0].x = x;
+            s->body[0].y = y;
+
+            // TELO (za hlavou)
+            for (int j = 1; j < s->length; j++) {
+                s->body[j].x = x - j;
+                s->body[j].y = y;
+            }
+
             my_id = i;
             break;
         }

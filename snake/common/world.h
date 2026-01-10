@@ -20,5 +20,6 @@ void world_random_generate(World *w);
 void flood_fill(World *w, int visited[MAP_H][MAP_W], int x, int y);
 int world_load(World *w, const char *filename);
 int world_is_wall(World *w, int x, int y);
+int world_is_safe_spawn(World *w, int x, int y);
 
 #endif
