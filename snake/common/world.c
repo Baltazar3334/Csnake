@@ -56,7 +56,6 @@ void world_random_generate(World *w) {
     }
 
     // overíme, že všetky prístupné polia sú dosiahnuteľné
-    // použijeme BFS alebo Flood-fill
     int visited[MAP_H][MAP_W];
     memset(visited, 0, sizeof(visited));
 
@@ -66,15 +65,21 @@ void world_random_generate(World *w) {
         start_y = rand() % w->height;
     }
 
-    // Flood-fill
     flood_fill(w, visited, start_x, start_y);
 
-    // všetky nevisited a neprekážkové polia sú odstránené
+    // všetky neprístupné polia označíme ako prekážky
     for (int y = 0; y < w->height; y++) {
         for (int x = 0; x < w->width; x++) {
             if (!visited[y][x] && w->cells[y][x] == 0) {
-                w->cells[y][x] = 1; // prekážka → neprístupné
+                w->cells[y][x] = 1;
             }
+        }
+    }
+
+
+    for (int y = 0; y < w->height; y++) {
+        for (int x = 0; x < w->width; x++) {
+            w->grid[y][x] = (w->cells[y][x] == 1) ? WORLD_WALL : WORLD_EMPTY;
         }
     }
 }
