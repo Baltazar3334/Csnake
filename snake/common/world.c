@@ -69,19 +69,30 @@ void world_random_generate(World *w) {
     w->width = MAP_W;
     w->height = MAP_H;
 
-    // najprv všetko voľné
+    // uvolnenie celej mapy
     memset(w->cells, 0, sizeof(w->cells));
 
-    // vložíme pevné prekážky, napr. 20% mapy
+    // ===== HRANICE MAPY = STENY =====
+    for (int x = 0; x < w->width; x++) {
+        w->cells[0][x] = 1;                 // horná stena
+        w->cells[w->height - 1][x] = 1;     // dolná stena
+    }
+
+    for (int y = 0; y < w->height; y++) {
+        w->cells[y][0] = 1;                 // ľavá stena
+        w->cells[y][w->width - 1] = 1;      // pravá stena
+    }
+
+    // vložíme pevné prekážky
     int total_cells = w->width * w->height;
     int obstacles = total_cells / 25;
 
     for (int i = 0; i < obstacles; i++) {
         int x, y;
         do {
-            x = rand() % w->width;
-            y = rand() % w->height;
-        } while (w->cells[y][x] != 0); // už je obsadené
+            x = 1 + rand() % (w->width - 2);
+            y = 1 + rand() % (w->height - 2);
+        } while (w->cells[y][x] != 0); // už je obsadené aby generator neprepisoval hranice mapy
 
         w->cells[y][x] = 1; // 1 = prekážka
     }
