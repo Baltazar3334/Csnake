@@ -56,6 +56,15 @@ void game_init(SharedGame *game,
 void game_move_snake(SharedGame *game, int id) {
     Snake *s = &game->snakes[id];
 
+    // ak je hráč pauznutý, nech sa nepohybuje
+    if (s->paused) return;
+
+    // ak má oneskorenie po návrate z pauzy, znižujeme timer
+    if (s->pause_timer > 0) {
+        s->pause_timer--;
+        return; // ešte sa nepohybuje
+    }
+
     /* posun tela */
     for (int i = s->length - 1; i > 0; i--) {
         s->body[i] = s->body[i - 1];
@@ -104,6 +113,8 @@ void game_move_snake(SharedGame *game, int id) {
 int game_check_collision(SharedGame *game, int id) {
     Snake *s = &game->snakes[id];
 
+    if (s->invincible) return 0;
+
     int x = s->body[0].x;
     int y = s->body[0].y;
 
@@ -126,13 +137,12 @@ int game_check_collision(SharedGame *game, int id) {
     for (int i = 0; i < MAX_PLAYERS; i++) {
         if (i == id || !game->snakes[i].active)
             continue;
-
         Snake *o = &game->snakes[i];
         for (int j = 0; j < o->length; j++) {
-            if (x == o->body[j].x &&
-                y == o->body[j].y) {
-                return 1;
-                }
+            if (x == o->body[j].x && y == o->body[j].y) {
+                if (!o->invincible)  // ak nie je pauznutý
+                    return 1;
+            }
         }
     }
 
