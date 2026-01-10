@@ -4,15 +4,19 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
-
-#define SHM_NAME "/snake_game_baltazar"
-#define SEM_NAME "/snake_sem_baltazar"
+#include <semaphore.h>
+#include <string.h>
 
 sem_t *game_sem = NULL;
 
 /* ===== SERVER ===== */
-int ipc_create() {
-    int fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);
+int ipc_create(const char* server_name) {
+    char shm_name[256];
+    char sem_name[256];
+    snprintf(shm_name, sizeof(shm_name), "/snake_game_%s", server_name);
+    snprintf(sem_name, sizeof(sem_name), "/snake_sem_%s", server_name);
+
+    int fd = shm_open(shm_name, O_CREAT | O_RDWR, 0666);
     if (fd == -1) {
         perror("shm_open");
         return -1;
@@ -25,11 +29,11 @@ int ipc_create() {
     }
 
     // Vytvorenie semaforu
-    game_sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, 0666, 1);
+    game_sem = sem_open(sem_name, O_CREAT | O_EXCL, 0666, 1);
     if (game_sem == SEM_FAILED) {
         if (errno == EEXIST) {
             // už existuje → pripoj sa
-            game_sem = sem_open(SEM_NAME, 0);
+            game_sem = sem_open(sem_name, 0);
             if (game_sem == SEM_FAILED) {
                 perror("sem_open existujuce");
                 close(fd);
@@ -47,8 +51,13 @@ int ipc_create() {
 }
 
 /* ===== CLIENT ===== */
-SharedGame* ipc_attach() {
-    int fd = shm_open(SHM_NAME, O_RDWR, 0666);
+SharedGame* ipc_attach(const char* server_name) {
+    char shm_name[256];
+    char sem_name[256];
+    snprintf(shm_name, sizeof(shm_name), "/snake_game_%s", server_name);
+    snprintf(sem_name, sizeof(sem_name), "/snake_sem_%s", server_name);
+
+    int fd = shm_open(shm_name, O_RDWR, 0666);
     if (fd == -1) {
         perror("shm_open attach");
         return NULL;
@@ -66,7 +75,7 @@ SharedGame* ipc_attach() {
     close(fd); // fd už nepotrebujeme po mmap
 
     // Pripojenie na existujúci semafor
-    game_sem = sem_open(SEM_NAME, 0);
+    game_sem = sem_open(sem_name, 0);
     if (game_sem == SEM_FAILED) {
         perror("sem_open attach");
         munmap(ptr, sizeof(SharedGame));
@@ -88,8 +97,12 @@ void ipc_detach(SharedGame *ptr) {
 }
 
 /* ===== CLEANUP PRE SERVER ===== */
-void ipc_destroy() {
-    // Odstráni shared memory a semafor
-    shm_unlink(SHM_NAME);
-    sem_unlink(SEM_NAME);
+void ipc_destroy(const char* server_name) {
+    char shm_name[256];
+    char sem_name[256];
+    snprintf(shm_name, sizeof(shm_name), "/snake_game_%s", server_name);
+    snprintf(sem_name, sizeof(sem_name), "/snake_sem_%s", server_name);
+
+    shm_unlink(shm_name);
+    sem_unlink(sem_name);
 }
