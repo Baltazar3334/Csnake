@@ -36,19 +36,28 @@ int snake_at(SharedGame *game, int x, int y) {
 
 // ===== Main =====
 
-int main(void) {
+int main(int argc, char **argv) {
+    if (argc < 2) {
+        printf("Pouzitie: %s <server_name>\n", argv[0]);
+        return 1;
+    }
+
+    const char *server_name = argv[1];
+
     srand(time(NULL));
 
-    if (ipc_create() == -1) {
-        fprintf(stderr, "Nepodarilo sa vytvorit shared memory\n");
+    if (ipc_create(server_name) == -1) {
+        fprintf(stderr, "Nepodarilo sa vytvorit shared memory pre server '%s'\n", server_name);
         exit(1);
     }
 
-    SharedGame *game = ipc_attach();
+
+    SharedGame *game = ipc_attach(server_name);
     if (!game) {
         perror("ipc_attach");
         exit(1);
     }
+
 
     sem_wait(game_sem);
     for (int i = 0; i < MAX_FRUITS; i++) {
@@ -251,7 +260,7 @@ int main(void) {
     }
 
     sleep(1);
-    ipc_destroy();
+    ipc_destroy(server_name);
 
     printf("Server ukoncil hru a uvolnil zdroje.\n");
     return 0;

@@ -38,10 +38,12 @@ typedef enum {
     MODE_TIME
 } GameMode;
 
+#define MAGIC_ID 0xDEADBEEF  // magické číslo na identifikáciu servera
+
 typedef struct {
+    int magic;             // pridáme sem na overenie servera
     Point fruits[MAX_FRUITS];
     Snake snakes[MAX_PLAYERS];
-
     int running;
     int game_time;
     int shutdown;
@@ -52,9 +54,9 @@ typedef struct {
 } SharedGame;
 
 // IPC funkcie
-int ipc_create();
-SharedGame* ipc_attach();
-void ipc_destroy();
+int ipc_create(const char* server_name);
+SharedGame* ipc_attach(const char* server_name);
+void ipc_destroy(const char* server_name);
 void ipc_detach(SharedGame *ptr);
 
 extern sem_t *game_sem;
