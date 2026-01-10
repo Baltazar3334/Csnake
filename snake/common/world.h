@@ -13,8 +13,11 @@ typedef struct {
     int width;
     int height;
     Cell grid[MAX_H][MAX_W];
+    int cells[MAP_H][MAP_W]; // 0 = voľné, 1 = prekážka
 } World;
 
+void world_random_generate(World *w);
+void flood_fill(World *w, int visited[MAP_H][MAP_W], int x, int y);
 int world_load(World *w, const char *filename);
 int world_is_wall(World *w, int x, int y);
 
