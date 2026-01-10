@@ -139,6 +139,8 @@ int main(int argc, char **argv) {
         printf("*                            *\n");
         printf("*   Skóre: %-6d            *\n", final_score);
         printf("******************************\n");
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF); //odstrani vsetky znaky ktore zostali po predchadzajucom volani
         printf("\nStlač ENTER pre ukončenie...\n");
         getchar();
     } else {
